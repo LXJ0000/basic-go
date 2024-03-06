@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// go get "github.com/stretchr/testify/require"
+
 func TestMax(t *testing.T) {
 	testCases := []struct {
 		name     string
