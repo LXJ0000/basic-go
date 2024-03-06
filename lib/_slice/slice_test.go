@@ -3,50 +3,98 @@ package _slice
 import (
 	"testing"
 
-	"github.com/LXJ0000/basic-go/lib"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMaxMinSum(t *testing.T) {
+func TestMax(t *testing.T) {
 	testCases := []struct {
-		nums     []lib.Ordered
-		expected lib.Ordered
+		name     string
+		nums     []int
+		expected int
 	}{
-		{[]lib.Ordered{1, 2, 3}, 3},             // Max test case
-		{[]lib.Ordered{-1, -2, -3}, -1},         // Max test case with negative numbers
-		{[]lib.Ordered{5, 5, 5}, 5},             // Max test case with equal numbers
-		{[]lib.Ordered{10, 20, 30}, 10},         // Min test case
-		{[]lib.Ordered{-10, -20, -30}, -30},     // Min test case with negative numbers
-		{[]lib.Ordered{5, 5, 5}, 5},             // Min test case with equal numbers
-		{[]lib.Ordered{1, 2, 3}, 6},             // Sum test case
-		{[]lib.Ordered{-1, -2, -3}, -6},         // Sum test case with negative numbers
-		{[]lib.Ordered{10, 20, 30}, 60},         // Sum test case with positive numbers
-		{[]lib.Ordered{1.1, 2.2, 3.3}, 3.3},     // Max test case with float numbers
-		{[]lib.Ordered{-1.1, -2.2, -3.3}, -1.1}, // Max test case with negative float numbers
-		{[]lib.Ordered{1.1, 2.2, 3.3}, 1.1},     // Min test case with float numbers
-		{[]lib.Ordered{-1.1, -2.2, -3.3}, -3.3}, // Min test case with negative float numbers
-		{[]lib.Ordered{1.1, 2.2, 3.3}, 6.6},     // Sum test case with float numbers
-		{[]lib.Ordered{-1.1, -2.2, -3.3}, -6.6}, // Sum test case with negative float numbers
+		{
+			name:     "positive numbers",
+			nums:     []int{1, 2, 3, 4, 5},
+			expected: 5,
+		},
+		{
+			name:     "negative numbers",
+			nums:     []int{-5, -4, -3, -2, -1},
+			expected: -1,
+		},
+		{
+			name:     "mixed numbers",
+			nums:     []int{-10, 0, 10, -5, 5},
+			expected: 10,
+		},
 	}
 
 	for _, tc := range testCases {
-		t.Run("", func(t *testing.T) {
-			// Test Max function
-			maxResult := Max(tc.nums...)
-			if maxResult != tc.expected {
-				t.Errorf("Max result for %v is incorrect, got: %v, want: %v", tc.nums, maxResult, tc.expected)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			result := Max(tc.nums...)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
 
-			// Test Min function
-			minResult := Min(tc.nums...)
-			if minResult != tc.expected {
-				t.Errorf("Min result for %v is incorrect, got: %v, want: %v", tc.nums, minResult, tc.expected)
-			}
+func TestMin(t *testing.T) {
+	testCases := []struct {
+		name     string
+		nums     []int
+		expected int
+	}{
+		{
+			name:     "positive numbers",
+			nums:     []int{1, 2, 3, 4, 5},
+			expected: 1,
+		},
+		{
+			name:     "negative numbers",
+			nums:     []int{-5, -4, -3, -2, -1},
+			expected: -5,
+		},
+		{
+			name:     "mixed numbers",
+			nums:     []int{-10, 0, 10, -5, 5},
+			expected: -10,
+		},
+	}
 
-			// Test Sum function
-			sumResult := Sum(tc.nums...)
-			if sumResult != tc.expected {
-				t.Errorf("Sum result for %v is incorrect, got: %v, want: %v", tc.nums, sumResult, tc.expected)
-			}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := Min(tc.nums...)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestSum(t *testing.T) {
+	testCases := []struct {
+		name     string
+		nums     []int
+		expected int
+	}{
+		{
+			name:     "positive numbers",
+			nums:     []int{1, 2, 3, 4, 5},
+			expected: 15,
+		},
+		{
+			name:     "negative numbers",
+			nums:     []int{-5, -4, -3, -2, -1},
+			expected: -15,
+		},
+		{
+			name:     "mixed numbers",
+			nums:     []int{-10, 0, 10, -5, 5},
+			expected: 0,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := Sum(tc.nums...)
+			require.Equal(t, tc.expected, result)
 		})
 	}
 }

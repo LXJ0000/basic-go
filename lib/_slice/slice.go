@@ -13,7 +13,7 @@ func Max[T lib.Ordered](nums ...T) T {
 func Min[T lib.Ordered](nums ...T) T {
 	minNum := nums[0]
 	for _, num := range nums {
-		minNum = max(minNum, num)
+		minNum = min(minNum, num)
 	}
 	return minNum
 }
