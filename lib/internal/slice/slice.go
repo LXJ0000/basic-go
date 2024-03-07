@@ -1,9 +1,8 @@
-package _slice
+package slice
 
 import (
-	"errors"
-
 	"github.com/LXJ0000/basic-go/lib"
+	"github.com/LXJ0000/basic-go/lib/internal/errs"
 )
 
 func Max[T lib.Ordered](nums ...T) T {
@@ -32,7 +31,31 @@ func Sum[T lib.Ordered](nums ...T) T {
 
 func DeleteAt[T any](nums []T, index int) ([]T, error) {
 	if index < 0 || index >= len(nums) {
-		return nil, errors.New("index out of range")
+		return nil, errs.NewErrIndexOutOfRange(len(nums), index)
 	}
 	return append(nums[:index], nums[index+1:]...), nil
+}
+
+func Shrink[T any](nums []T) []T {
+	c, l := cap(nums), len(nums)
+	n, isChang := calCapacity(c, l)
+	if !isChang {
+		return nums
+	}
+	newNums := make([]T, 0, n)
+	newNums = append(newNums, nums...)
+	return newNums
+}
+
+func calCapacity(c, l int) (int, bool) {
+	if c <= 64 {
+		return c, false
+	}
+	if c <= 2048 && (c/l >= 4) {
+		return int(float32(c) * 0.5), true
+	}
+	if c > 2048 && (c/l >= 2) {
+		return int(float32(c) * 0.625), true
+	}
+	return c, false
 }
