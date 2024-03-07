@@ -28,3 +28,7 @@ func (s *MapSet[T]) Exists(key T) bool {
 	_, ok := s.m[key]
 	return ok
 }
+
+func (s *MapSet[T]) Len() int {
+	return len(s.m)
+}

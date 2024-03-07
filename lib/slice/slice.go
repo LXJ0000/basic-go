@@ -3,6 +3,7 @@ package slice
 import (
 	"github.com/LXJ0000/basic-go/lib"
 	"github.com/LXJ0000/basic-go/lib/errs"
+	"github.com/LXJ0000/basic-go/lib/set"
 )
 
 func Max[T lib.Ordered](nums ...T) T {
@@ -29,14 +30,14 @@ func Sum[T lib.Ordered](nums ...T) T {
 	return sum
 }
 
-func DeleteAt[T any](nums []T, index int) ([]T, error) {
+func DeleteAt[T lib.Ordered](nums []T, index int) ([]T, error) {
 	if index < 0 || index >= len(nums) {
 		return nil, errs.NewErrIndexOutOfRange(len(nums), index)
 	}
 	return append(nums[:index], nums[index+1:]...), nil
 }
 
-func Shrink[T any](nums []T) []T {
+func Shrink[T lib.Ordered](nums []T) []T {
 	calCapacity := func(c, l int) (int, bool) {
 		if c <= 64 {
 			return c, false
@@ -56,5 +57,38 @@ func Shrink[T any](nums []T) []T {
 	}
 	newNums := make([]T, 0, n)
 	newNums = append(newNums, nums...)
+	return newNums
+}
+
+func Unique[T lib.Ordered](nums []T) []T {
+	newNums := make([]T, 0, len(nums))
+	uniqueByLoop := func(nums []T) {
+		for _, num := range nums {
+			flag := true
+			for _, newNum := range newNums {
+				if num == newNum {
+					flag = false
+				}
+			}
+			if flag {
+				newNums = append(newNums, num)
+			}
+		}
+	}
+	uniqueBySet := func(nums []T) {
+		s := set.NewMapSet[T](len(nums))
+		for _, num := range nums {
+			if !s.Exists(num) {
+				newNums = append(newNums, num)
+			}
+			s.Add(num)
+		}
+	}
+	if len(nums) < 1024 {
+		uniqueByLoop(nums)
+	} else {
+		uniqueBySet(nums)
+	}
+	Shrink(newNums)
 	return newNums
 }

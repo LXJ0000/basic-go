@@ -134,3 +134,24 @@ func TestDeleteAt(t *testing.T) {
 		})
 	}
 }
+
+func TestUnique(t *testing.T) {
+	testCases := []struct {
+		name     string
+		nums     []int
+		expected []int
+	}{
+		{
+			name:     "positive",
+			nums:     []int{1, 2, 2, 2, 3, 5, 4, 5, 6, 6, 1, 3, 4, 5},
+			expected: []int{1, 2, 3, 5, 4, 6},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := Unique(tc.nums)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
