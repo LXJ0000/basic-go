@@ -5,6 +5,10 @@ import "github.com/gin-gonic/gin"
 type UserHandler struct {
 }
 
+const (
+// todo regex
+)
+
 func (u *UserHandler) Profile(ctx *gin.Context) {
 
 }
