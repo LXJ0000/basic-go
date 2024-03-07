@@ -2,7 +2,7 @@ package slice
 
 import (
 	"github.com/LXJ0000/basic-go/lib"
-	"github.com/LXJ0000/basic-go/lib/internal/errs"
+	"github.com/LXJ0000/basic-go/lib/errs"
 )
 
 func Max[T lib.Ordered](nums ...T) T {
