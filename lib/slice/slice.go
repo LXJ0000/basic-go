@@ -37,6 +37,18 @@ func DeleteAt[T any](nums []T, index int) ([]T, error) {
 }
 
 func Shrink[T any](nums []T) []T {
+	calCapacity := func(c, l int) (int, bool) {
+		if c <= 64 {
+			return c, false
+		}
+		if c <= 2048 && (c/l >= 4) {
+			return int(float32(c) * 0.5), true
+		}
+		if c > 2048 && (c/l >= 2) {
+			return int(float32(c) * 0.625), true
+		}
+		return c, false
+	}
 	c, l := cap(nums), len(nums)
 	n, isChang := calCapacity(c, l)
 	if !isChang {
@@ -45,17 +57,4 @@ func Shrink[T any](nums []T) []T {
 	newNums := make([]T, 0, n)
 	newNums = append(newNums, nums...)
 	return newNums
-}
-
-func calCapacity(c, l int) (int, bool) {
-	if c <= 64 {
-		return c, false
-	}
-	if c <= 2048 && (c/l >= 4) {
-		return int(float32(c) * 0.5), true
-	}
-	if c > 2048 && (c/l >= 2) {
-		return int(float32(c) * 0.625), true
-	}
-	return c, false
 }
