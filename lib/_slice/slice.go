@@ -1,6 +1,10 @@
 package _slice
 
-import "github.com/LXJ0000/basic-go/lib"
+import (
+	"errors"
+
+	"github.com/LXJ0000/basic-go/lib"
+)
 
 func Max[T lib.Ordered](nums ...T) T {
 	maxNum := nums[0]
@@ -24,4 +28,11 @@ func Sum[T lib.Ordered](nums ...T) T {
 		sum += num
 	}
 	return sum
+}
+
+func DeleteAt[T any](nums []T, index int) ([]T, error) {
+	if index < 0 || index >= len(nums) {
+		return nil, errors.New("index out of range")
+	}
+	return append(nums[:index], nums[index+1:]...), nil
 }
