@@ -3,9 +3,16 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"webook-server/internal/domain"
+	"webook-server/internal/service"
 )
 
 type UserHandler struct {
+	svc *service.UserService
+}
+
+func NewUserHandler(svc *service.UserService) *UserHandler {
+	return &UserHandler{svc: svc}
 }
 
 const (
@@ -31,12 +38,18 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		// todo error
 		return
 	}
-	//todo 登陆逻辑
+	//todo get resp
+	err := u.svc.Login(ctx)
+	if err != nil {
+		//todo error
+		return
+	}
 	ctx.JSON(http.StatusOK, Resp{
 		Code: 0,
 		Msg:  "登录成功",
 	})
 }
+
 func (u *UserHandler) Register(ctx *gin.Context) {
 	type Req struct {
 		UserName        string `json:"user_name"`
@@ -50,7 +63,16 @@ func (u *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 	//todo 参数校验 - 正则匹配
-	//todo 注册逻辑
+	//todo get resp
+	err := u.svc.Register(ctx, domain.User{
+		Email:    req.Email,
+		UserName: req.UserName,
+		Password: req.Password,
+	})
+	if err != nil {
+		//todo error
+		return
+	}
 	ctx.JSON(http.StatusOK, Resp{
 		Code: 0,
 		Msg:  "注册成功",
