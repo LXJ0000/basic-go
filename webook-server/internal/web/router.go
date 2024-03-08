@@ -1,15 +1,28 @@
 package web
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"strings"
+	"time"
 )
 
 func InitRouter() *gin.Engine {
 	r := gin.Default()
-	r.GET("ping", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "pong")
-	})
+
+	//跨域解决方案 https://github.com/gin-contrib/cors
+	r.Use(cors.New(cors.Config{
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true, // 允许带 cookie
+		AllowOriginFunc: func(origin string) bool {
+			if strings.Contains(origin, "http://localhost") {
+				return true
+			}
+			return strings.Contains(origin, "www.example.com")
+		},
+		MaxAge: 12 * time.Hour,
+	}))
+
 	initUserRouter(r)
 	return r
 }
