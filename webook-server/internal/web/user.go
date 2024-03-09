@@ -84,7 +84,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 
 	switch err {
 	case nil:
-		token, _ := jwt.GenToken(user.UserId, user.UserName)
+		token, _ := jwt.GenToken(ctx, user.UserId, user.UserName)
 		ctx.JSON(http.StatusOK, gin.H{
 			"token": token,
 			"code":  0,

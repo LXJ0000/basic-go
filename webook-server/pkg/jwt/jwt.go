@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -12,15 +13,17 @@ var (
 )
 
 type MyClaims struct {
-	UserID   int64  `json:"user_id"`
-	Username string `json:"user_name"`
+	UserID    int64  `json:"user_id"`
+	Username  string `json:"user_name"`
+	UserAgent string
 	jwt.RegisteredClaims
 }
 
-func GenToken(userID int64, username string) (string, error) {
+func GenToken(ctx *gin.Context, userID int64, username string) (string, error) {
 	c := MyClaims{
-		UserID:   userID,
-		Username: username,
+		UserID:    userID,
+		Username:  username,
+		UserAgent: ctx.Request.UserAgent(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "Jannan",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp)),
@@ -30,7 +33,7 @@ func GenToken(userID int64, username string) (string, error) {
 	return token.SignedString(secret)
 }
 
-func ParseToken(tokenString string) (*MyClaims, error) {
+func ParseToken(ctx *gin.Context, tokenString string) (*MyClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})
