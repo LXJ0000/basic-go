@@ -6,3 +6,8 @@
 - 长短token
 ## 3. 参数如何设定
 性能测试
+## 4. JWT JSON WEB TOKEN
+Header Payload Signature 三部分组成
+## 5. JWT 优缺点
+优点：不依赖第三方存储、适合在分布式环境下使用、性能好（没有 Redis 访问之类）
+缺点：对加密依赖较大，比 Session 任意泄露、不要再 JWT 中存放敏感信息

@@ -4,9 +4,34 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
+	"webook-server/pkg/jwt"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func JwtAuthMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authHeader := ctx.Request.Header.Get("Authorization")
+		if authHeader == "" {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		parts := strings.SplitN(authHeader, " ", 2)
+		if !(len(parts) == 2 && parts[0] == "Bearer") {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		claim, err := jwt.ParseToken(parts[1])
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		ctx.Set("user_id", claim.UserID)
+		ctx.Set("user_name", claim.Username)
+		ctx.Next()
+	}
+}
+
+func SessionAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
 		id := session.Get("user_id")

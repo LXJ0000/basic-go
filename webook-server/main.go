@@ -7,6 +7,7 @@ import (
 
 func main() {
 	snowflake.Init("2023-01-01", 1)
+	web.InitMysql()
 	r := web.InitRouter()
 	_ = r.Run(":8080")
 }

@@ -2,11 +2,7 @@ package web
 
 import (
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"strings"
 	"time"
 	"webook-server/internal/repository"
@@ -31,37 +27,16 @@ func InitRouter() *gin.Engine {
 			}
 			return strings.Contains(origin, "www.example.com")
 		},
-		MaxAge: 12 * time.Hour,
+		ExposeHeaders: []string{"token"},
+		MaxAge:        12 * time.Hour,
 	}))
 
-	//登陆验证 https://github.com/gin-contrib/sessions
-	//store := cookie.NewStore([]byte("secret")) // Cookie 存储 数据
-	store, err := redis.NewStore(
-		16, // 最大空闲连接
-		"tcp",
-		"localhost:6379",
-		"",
-		[]byte("8PTHDJV7izsk5f51eOmnYe5Fbrh5T17B"), // authorization key 32位
-		[]byte("b1SkuScy8Mwuma90OOQMk7dwWqUMyEEF"), // encryption key 32位
-	)
-	if err != nil {
-		panic(err)
-	}
-	r.Use(sessions.Sessions("my_session", store))
-
 	initUserRouter(r)
+
 	return r
 }
 
 func initUserRouter(r *gin.Engine) {
-	dsn := "root:root@tcp(127.0.0.1:3306)/webook?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	if err = dao2.InitTable(db); err != nil {
-		panic(err)
-	}
 	dao := dao2.NewUserDao(db)
 	repo := repository.NewUserRepository(dao)
 	svc := service.NewUserService(repo)
@@ -71,7 +46,6 @@ func initUserRouter(r *gin.Engine) {
 	userGroup.POST("/login", user.Login)
 	userGroup.POST("/register", user.Register)
 
-	authUserGroup := userGroup.Use(middleware.AuthMiddleware())
+	authUserGroup := userGroup.Use(middleware.JwtAuthMiddleware())
 	authUserGroup.GET("/", user.Profile)
-
 }
