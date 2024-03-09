@@ -1,56 +1,35 @@
 package web
 
 import (
+	regexp "github.com/dlclark/regexp2"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"webook-server/internal/domain"
 	"webook-server/internal/service"
+	"webook-server/pkg/snowflake"
+)
+
+const (
+	RegexpPassword = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
+	RegexpEmail    = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
 )
 
 type UserHandler struct {
-	svc *service.UserService
+	svc            *service.UserService
+	emailRegexp    *regexp.Regexp
+	passwordRegexp *regexp.Regexp
 }
 
 func NewUserHandler(svc *service.UserService) *UserHandler {
-	return &UserHandler{svc: svc}
-}
-
-const (
-// todo regex
-)
-
-type Resp struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-}
-
-func (u *UserHandler) Profile(ctx *gin.Context) {
-
-}
-
-func (u *UserHandler) Login(ctx *gin.Context) {
-	type Req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+	return &UserHandler{
+		svc:            svc,
+		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
+		passwordRegexp: regexp.MustCompile(RegexpPassword, regexp.None),
 	}
-	var req Req
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		// todo error
-		return
-	}
-	//todo get resp
-	err := u.svc.Login(ctx)
-	if err != nil {
-		//todo error
-		return
-	}
-	ctx.JSON(http.StatusOK, Resp{
-		Code: 0,
-		Msg:  "登录成功",
-	})
 }
 
-func (u *UserHandler) Register(ctx *gin.Context) {
+func (h *UserHandler) Register(ctx *gin.Context) {
 	type Req struct {
 		UserName        string `json:"user_name"`
 		Email           string `json:"email"`
@@ -62,19 +41,67 @@ func (u *UserHandler) Register(ctx *gin.Context) {
 		// todo error
 		return
 	}
-	//todo 参数校验 - 正则匹配
-	//todo get resp
-	err := u.svc.Register(ctx, domain.User{
+	if isEmail, _ := h.emailRegexp.MatchString(req.Email); !isEmail {
+		ctx.String(http.StatusOK, "非法邮箱格式")
+		return
+	}
+	if req.Password != req.ConfirmPassword {
+		ctx.String(http.StatusOK, "两次输入密码不对")
+		return
+	}
+	if isPassword, _ := h.passwordRegexp.MatchString(req.Password); !isPassword {
+		ctx.String(http.StatusOK, "密码必须包含字母、数字、特殊字符，并且不少于八位")
+		return
+	}
+
+	err := h.svc.Register(ctx, domain.User{
+		UserId:   snowflake.GenID(),
 		Email:    req.Email,
 		UserName: req.UserName,
 		Password: req.Password,
 	})
-	if err != nil {
-		//todo error
+	switch err {
+	case nil:
+		ctx.String(http.StatusOK, "注册成功")
+	case service.ErrDuplicateEmail:
+		ctx.String(http.StatusOK, "邮箱或用户名已存在")
+	default:
+		ctx.String(http.StatusOK, "系统错误")
+	}
+}
+
+func (h *UserHandler) Login(ctx *gin.Context) {
+	type Req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	var req Req
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return
 	}
-	ctx.JSON(http.StatusOK, Resp{
-		Code: 0,
-		Msg:  "注册成功",
-	})
+
+	user, err := h.svc.Login(ctx, req.Email, req.Password)
+	session := sessions.Default(ctx)
+	session.Set("user_id", user.UserId) // to
+	_ = session.Save()
+	switch err {
+	case nil:
+		ctx.String(http.StatusOK, "登陆成功")
+	case service.ErrInvalidUserOrPassword:
+		ctx.String(http.StatusOK, "用户名或密码错误")
+	default:
+		ctx.String(http.StatusOK, "系统错误")
+	}
+}
+
+func (h *UserHandler) Profile(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	userId := session.Get("user_id")
+
+	user, err := h.svc.Profile(ctx, userId.(int64))
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
 }

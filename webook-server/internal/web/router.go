@@ -2,6 +2,8 @@ package web
 
 import (
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,10 +12,14 @@ import (
 	"webook-server/internal/repository"
 	dao2 "webook-server/internal/repository/dao"
 	"webook-server/internal/service"
+	"webook-server/internal/web/middleware"
 )
 
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+	r.GET("ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
 
 	//跨域解决方案 https://github.com/gin-contrib/cors
 	r.Use(cors.New(cors.Config{
@@ -27,6 +33,10 @@ func InitRouter() *gin.Engine {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
+
+	//登陆验证 https://github.com/gin-contrib/sessions
+	store := cookie.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("my_session", store))
 
 	initUserRouter(r)
 	return r
@@ -47,7 +57,10 @@ func initUserRouter(r *gin.Engine) {
 	user := NewUserHandler(svc)
 
 	userGroup := r.Group("user")
-	userGroup.GET("/", user.Profile)
 	userGroup.POST("/login", user.Login)
 	userGroup.POST("/register", user.Register)
+
+	authUserGroup := userGroup.Use(middleware.AuthMiddleware())
+	authUserGroup.GET("/", user.Profile)
+
 }

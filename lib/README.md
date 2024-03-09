@@ -11,3 +11,9 @@
   - 树
   - **并发**：协程池、并发工具（包括并发队列、并发阻塞队列、并发阻塞优先队列
   - [ecodeclub/ekit](https://github.com/ecodeclub/ekit)
+
+- GORM
+  - 可观察性的插件实现
+  - 读写分离插件
+  - BeforeFind 功能
+  - 辅助方法
