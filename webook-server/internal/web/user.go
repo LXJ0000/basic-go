@@ -82,8 +82,12 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 
 	user, err := h.svc.Login(ctx, req.Email, req.Password)
 	session := sessions.Default(ctx)
-	session.Set("user_id", user.UserId) // to
+	session.Set("user_id", user.UserId)
+	session.Options(sessions.Options{
+		MaxAge: 30 * 60, // 登录状态保持 30 分钟
+	})
 	_ = session.Save()
+
 	switch err {
 	case nil:
 		ctx.String(http.StatusOK, "登陆成功")

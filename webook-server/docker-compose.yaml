@@ -9,4 +9,10 @@ services:
     volumes:
       - "./script/mysql/:/docker-entrypoint-initdb.d/"
     ports:
-      - "33060:3306"
+      - "3306:3306"
+  redis:
+    image: "redis"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"

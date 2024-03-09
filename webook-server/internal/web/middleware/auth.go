@@ -14,5 +14,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+		ctx.Next()
 	}
 }
