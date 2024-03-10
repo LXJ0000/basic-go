@@ -1,0 +1,13 @@
+# pvc persistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-claim # mysql 要用的 volume
+spec:
+  storageClassName: manual # 随便
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+

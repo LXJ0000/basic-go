@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume # k8s's volume
+metadata:
+  name: mysql-pv # 名字不重要了
+spec:
+  storageClassName: manual # 重要 与 pvc storageClassName 一致
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"

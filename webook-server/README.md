@@ -44,3 +44,4 @@ kubectl get deployments
 kubectl get pods
 kubectl get services
 ```
+## 8. k8s 部署 MySQL
