@@ -1,17 +1,19 @@
-apiVersion: apps/v1
+apiVersion: apps/v1 # 协议
 kind: Deployment
 metadata:
   name: webook
-spec:
-  replicas: 3
-  selector:
+spec: # Deployment's 规格说明 specification
+  replicas: 3 # Pod 数量
+  selector: # 筛选器
     matchLabels:
       app: webook
-  template:
+  template: # Pod 模板
     metadata:
       labels:
         app: webook
-    spec:
+    spec: # Pod's 规格说明
       containers:
         - name: webook
           image: jannanxj/webook:v1
+          ports:
+            - containerPort: 8080

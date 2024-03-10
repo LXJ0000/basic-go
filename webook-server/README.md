@@ -37,3 +37,10 @@ Header Payload Signature 三部分组成
 ### 安装
 [参考文档](https://www.qikqiak.com/post/deploy-k8s-on-win-use-wsl2/)
 [参考视频](https://www.bilibili.com/video/BV1Ru41137s2/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=2cb41caee9551fbf13c606149026e31c)
+```bash
+kubectl apply -f k8s-webook-deployment.yaml
+kubectl apply -f k8s-webook-service.yaml
+kubectl get deployments
+kubectl get pods
+kubectl get services
+```
