@@ -25,7 +25,7 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 	return &UserHandler{
 		svc:            svc,
 		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
-		passwordRegexp: regexp.MustCompile(RegexpPassword, regexp.None),
+		passwordRegexp:  regexp.MustCompile(RegexpPassword, regexp.None),
 	}
 }
 

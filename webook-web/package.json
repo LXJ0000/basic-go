@@ -1,7 +1,7 @@
 {
   "name": "webook-web",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.19"
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.54.6",
     "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.1.4"
+    "vite": "^5.1.5"
   }
 }
