@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/go-sql-driver/mysql"
-	"time"
-
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
@@ -19,10 +18,13 @@ type UserDao struct {
 }
 
 func NewUserDao(db *gorm.DB) *UserDao {
-	return &UserDao{db: db}
+	return &UserDao{
+		db: db,
+	}
 }
 
 func (dao *UserDao) Insert(ctx context.Context, u User) error {
+	//todo cache
 	now := time.Now().UnixMilli()
 	u.CreateAt = now
 	u.UpdateAt = now
@@ -37,13 +39,13 @@ func (dao *UserDao) Insert(ctx context.Context, u User) error {
 	return err
 }
 
-func (dao *UserDao) QueryByEmail(ctx context.Context, email string) (User, error) {
+func (dao *UserDao) FindByEmail(ctx context.Context, email string) (User, error) {
 	var u User
 	err := dao.db.WithContext(ctx).Model(&User{}).Where("email=?", email).First(&u).Error
 	return u, err
 }
 
-func (dao *UserDao) QueryByUserId(ctx context.Context, userId int64) (User, error) {
+func (dao *UserDao) FindByUserId(ctx context.Context, userId int64) (User, error) {
 	var u User
 	err := dao.db.WithContext(ctx).Model(&User{}).Where("user_id=?", userId).First(&u).Error
 	return u, err

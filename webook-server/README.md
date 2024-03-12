@@ -80,7 +80,20 @@ kubectl apply -f k8s-mysql-pvc.yaml
 kubectl apply -f k8s-mysql-deployment.yaml
 kubectl apply -f k8s-ingress-nginx.yaml
 ```
-## 11. 
+## 11. 启动配置
 ```bash
 go build -tags=k8s -o webook .
 ```
+## 12. 压测
+```bash
+wrk -t4 -d5s -c50 -s ./script/wrk/register.lua http://localhost:8080/user/register
+# t 线程 d 持续时间 c 并发数 s 后接测试脚本
+wrk -t4 -d5s -c50 -s ./script/wrk/login.lua http://localhost:8080/user/login
+```
+## 13. 性能优化
+### 1. 缓存
+崩了？
+1. 加载数据库，做好兜底，数据库限流
+2. 不加载数据库，用户体验差
+
+- 主从集群

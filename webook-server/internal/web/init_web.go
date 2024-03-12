@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"webook-server/internal/config"
@@ -8,6 +9,7 @@ import (
 )
 
 var db *gorm.DB
+var redisClient *redis.Client
 
 func InitMysql() {
 	dsn := config.Config.DB.DSN
@@ -19,4 +21,11 @@ func InitMysql() {
 		panic(err)
 	}
 	db = _db
+}
+
+func InitRedis() {
+	client := redis.NewClient(&redis.Options{
+		Addr: config.Config.Redis.Addr,
+	})
+	redisClient = client
 }

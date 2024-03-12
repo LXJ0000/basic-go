@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 	"webook-server/internal/repository"
+	cache2 "webook-server/internal/repository/cache"
 	dao2 "webook-server/internal/repository/dao"
 	"webook-server/internal/service"
 	"webook-server/internal/web/middleware"
@@ -38,7 +39,9 @@ func InitRouter() *gin.Engine {
 
 func initUserRouter(r *gin.Engine) {
 	dao := dao2.NewUserDao(db)
-	repo := repository.NewUserRepository(dao)
+	cache := cache2.NewUserCache(redisClient)
+	
+	repo := repository.NewUserRepository(dao, cache)
 	svc := service.NewUserService(repo)
 	user := NewUserHandler(svc)
 
