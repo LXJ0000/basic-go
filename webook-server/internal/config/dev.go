@@ -3,6 +3,6 @@
 package config
 
 var Config = config{
-	DB:    DBConfig{DSN: "localhost:3306"},
+	DB:    DBConfig{DSN: "root:root@tcp(localhost:3306)/webook?charset=utf8mb4&parseTime=True&loc=Local"},
 	Redis: RedisConfig{Addr: "localhost:6379"},
 }

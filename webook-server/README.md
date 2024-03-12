@@ -62,6 +62,8 @@ kubectl delete service webook-redis
 kubectl delete pv mysql-pv
 kubectl delete pvc mysql-claim
 
+kubectl delete ingress webook-ingress
+
 kubectl get pod
 kubectl get deployment
 kubectl get service

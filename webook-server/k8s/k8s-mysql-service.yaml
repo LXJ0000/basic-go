@@ -7,7 +7,7 @@ spec:
     app: webook-mysql
   ports:
     - protocol: TCP
-      port: 23306 # 外部访问端口
+      port: 3306 # 外部访问端口
       targetPort: 3306 # 与 Pod 的 containerPort 对应
   type: LoadBalancer
   
