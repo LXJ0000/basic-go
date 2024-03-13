@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webook-redis
+spec:
+  selector:
+    app: webook-redis
+  ports:
+    - protocol: TCP
+      port: 16379 # 外部访问端口
+      targetPort: 6379 # 与 Pod 的 containerPort 对应
+  type: LoadBalancer
+  

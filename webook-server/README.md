@@ -45,3 +45,40 @@ kubectl get pods
 kubectl get services
 ```
 ## 8. k8s 部署 MySQL
+## 9. k8s 部署 Redis
+```bash
+redis-cli -h localhost -p 16379
+```
+## 10. 
+```bash
+kubectl delete deployment webook
+kubectl delete deployment webook-mysql
+kubectl delete deployment webook-redis
+
+kubectl delete service webook
+kubectl delete service webook-mysql
+kubectl delete service webook-redis
+
+kubectl delete pv mysql-pv
+kubectl delete pvc mysql-claim
+
+kubectl get pod
+kubectl get deployment
+kubectl get service
+kubectl get pv
+kubectl get pvc
+
+kubectl apply -f k8s-webook-deployment.yaml
+kubectl apply -f k8s-webook-service.yaml
+kubectl apply -f k8s-redis-service.yaml
+kubectl apply -f k8s-redis-deployment.yaml
+kubectl apply -f k8s-mysql-service.yaml
+kubectl apply -f k8s-mysql-pv.yaml
+kubectl apply -f k8s-mysql-pvc.yaml
+kubectl apply -f k8s-mysql-deployment.yaml
+kubectl apply -f k8s-ingress-nginx.yaml
+```
+## 11. 
+```bash
+go build -tags=k8s -o webook .
+```
