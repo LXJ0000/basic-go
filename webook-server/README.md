@@ -97,3 +97,15 @@ wrk -t4 -d5s -c50 -s ./script/wrk/login.lua http://localhost:8080/user/login
 2. 不加载数据库，用户体验差
 
 - 主从集群
+
+## 14. 多种登陆方式
+### 需求分析
+1. 参考竞品
+2. 从不同角度分析：
+   1. 功能：
+   2. 非功能： 安全 - 拓展 - 性能
+3. 从正常、异常流程两个角度分析
+### 腾讯云 SDK
+```bash
+go get -v -u github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
+```
