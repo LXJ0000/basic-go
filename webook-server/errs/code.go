@@ -4,6 +4,9 @@ package errs
 
 // User
 const (
-	CodeUserInvalidInput        = 40101
-	CodeUserInternalServerError = 50101
+	CodeUserInvalidInput = 40100 + iota
+	CodeUserNameOrEmailDuplicate
+	CodeUserNotAuthorization
+
+	CodeUserInternalServerError = 50100
 )

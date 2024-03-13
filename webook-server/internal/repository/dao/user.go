@@ -27,7 +27,8 @@ func (dao *UserDao) Insert(ctx context.Context, u User) error {
 	u.CreateAt = now
 	u.UpdateAt = now
 	err := dao.db.WithContext(ctx).Create(&u).Error
-	if me, ok := err.(*mysql.MySQLError); ok {
+	var me *mysql.MySQLError
+	if errors.As(err, &me) {
 		const duplicateErr uint16 = 1062
 		if me.Number == duplicateErr {
 			return ErrDuplicateEmail
