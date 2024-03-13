@@ -6,7 +6,7 @@ import (
 )
 
 func TestLinkedList_PushFront(t *testing.T) {
-	l := NewLinkList()
+	l := NewLinkList(0, 0)
 	l.PushBack(1)
 	l.PushBack(2)
 	l.PushBack(3)

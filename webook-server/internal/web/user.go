@@ -1,13 +1,14 @@
 package web
 
 import (
-	regexp "github.com/dlclark/regexp2"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"webook-server/internal/domain"
 	"webook-server/internal/service"
 	"webook-server/pkg/jwt"
 	"webook-server/pkg/snowflake"
+
+	regexp "github.com/dlclark/regexp2"
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -25,7 +26,7 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 	return &UserHandler{
 		svc:            svc,
 		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
-		passwordRegexp:  regexp.MustCompile(RegexpPassword, regexp.None),
+		passwordRegexp: regexp.MustCompile(RegexpPassword, regexp.None),
 	}
 }
 

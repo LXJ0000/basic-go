@@ -12,15 +12,22 @@ type LinkedList struct {
 	size       int
 }
 
-func NewLinkList() *LinkedList {
+func NewLinkList(nums ...int) *LinkedList {
 	head := &node{}
 	tail := &node{}
 	head.next = tail
 	tail.prev = head
-	return &LinkedList{
+
+	l := &LinkedList{
 		head: head,
 		tail: tail,
 	}
+
+	for _, num := range nums {
+		l.PushBack(num)
+	}
+
+	return l
 }
 
 // PushFront 在首部追加元素
