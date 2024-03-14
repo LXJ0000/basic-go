@@ -16,7 +16,7 @@ var (
 
 	ErrCodeSendFrequently   = errors.New("验证码发送过于频繁")
 	ErrCodeVerifyFrequently = errors.New("验证过于频繁")
-	ErrUnknow               = errors.New("未知错误")
+	ErrUnknown              = errors.New("未知错误")
 )
 
 type CodeCache struct {
@@ -34,7 +34,7 @@ func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
 	}
 	switch res {
 	case -2:
-		return ErrUnknow
+		return ErrUnknown
 	case -1:
 		return ErrCodeSendFrequently
 	}
@@ -54,7 +54,7 @@ func (c *CodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, 
 	case 0:
 		return true, nil
 	}
-	return false, ErrUnknow
+	return false, ErrUnknown
 }
 
 func (c *CodeCache) key(biz, phone string) string {

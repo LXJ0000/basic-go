@@ -9,7 +9,9 @@ import (
 	cache2 "webook-server/internal/repository/cache"
 	dao2 "webook-server/internal/repository/dao"
 	"webook-server/internal/service"
+	"webook-server/internal/service/sms/local"
 	"webook-server/internal/web/middleware"
+	"webook-server/ioc"
 )
 
 func InitRouter() *gin.Engine {
@@ -38,16 +40,27 @@ func InitRouter() *gin.Engine {
 }
 
 func initUserRouter(r *gin.Engine) {
+	db := ioc.InitDB()
+	redisCmd := ioc.InitRedis()
+
 	dao := dao2.NewUserDao(db)
-	cache := cache2.NewUserCache(redisClient)
-	
+	cache := cache2.NewUserCache(redisCmd)
 	repo := repository.NewUserRepository(dao, cache)
 	svc := service.NewUserService(repo)
-	user := NewUserHandler(svc)
+
+	codeCache := cache2.NewCodeCache(redisCmd)
+	codeRepo := repository.NewCodeRepository(codeCache)
+	smsSvc := local.NewService()
+	codeSvc := service.NewCodeService(codeRepo, smsSvc)
+
+	user := NewUserHandler(svc, codeSvc)
 
 	userGroup := r.Group("/user")
 	userGroup.POST("/login", user.Login)
 	userGroup.POST("/register", user.Register)
+
+	userGroup.POST("login/sms/code", user.SendLoginSMSCode)
+	userGroup.POST("login/sms/verify", user.VerifyLoginSMSCode)
 
 	authUserGroup := userGroup.Use(middleware.JwtAuthMiddleware())
 	authUserGroup.GET("/", user.Profile)

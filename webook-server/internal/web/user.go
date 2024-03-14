@@ -18,28 +18,53 @@ const (
 	RegexpEmail    = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
 )
 
-type UserHandler struct {
-	svc            *service.UserService
-	emailRegexp    *regexp.Regexp
-	passwordRegexp *regexp.Regexp
-}
-
-type Response struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"'msg'"`
-	Data interface{} `json:"data,omitempty"`
-}
-
 type UserToken struct {
 	Token string `json:"token"`
 }
 
-func NewUserHandler(svc *service.UserService) *UserHandler {
+type UserHandler struct {
+	svc            *service.UserService
+	codeSvc        *service.CodeService
+	emailRegexp    *regexp.Regexp
+	passwordRegexp *regexp.Regexp
+}
+
+func NewUserHandler(svc *service.UserService, codeSvc *service.CodeService) *UserHandler {
 	return &UserHandler{
 		svc:            svc,
+		codeSvc:        codeSvc,
 		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
 		passwordRegexp: regexp.MustCompile(RegexpPassword, regexp.None),
 	}
+}
+
+func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
+
+}
+
+func (h *UserHandler) SendLoginSMSCode(ctx *gin.Context) {
+	type Req struct {
+		Phone string `json:"phone"`
+	}
+	var req Req
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInvalidInput,
+			Msg:  "请求参数有误",
+		})
+		return
+	}
+	const biz = "login"
+	if err := h.codeSvc.Send(ctx, biz, req.Phone); err != nil {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInternalServerError,
+			Msg:  "系统错误",
+		})
+	}
+	ctx.JSON(http.StatusOK, Response{
+		Code: 0,
+		Msg:  "发送成功",
+	})
 }
 
 func (h *UserHandler) Register(ctx *gin.Context) {
@@ -155,8 +180,8 @@ func (h *UserHandler) Profile(ctx *gin.Context) {
 	user, err := h.svc.Profile(ctx, userId)
 	if err != nil {
 		ctx.JSON(http.StatusOK, Response{
-			Code: 1,
-			Msg:  "fail",
+			Code: errs.CodeUserInternalServerError,
+			Msg:  "系统错误",
 		})
 		return
 	}
