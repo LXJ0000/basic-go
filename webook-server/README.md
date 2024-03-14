@@ -109,3 +109,21 @@ wrk -t4 -d5s -c50 -s ./script/wrk/login.lua http://localhost:8080/user/login
 ```bash
 go get -v -u github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 ```
+### 验证码服务
+1. 安全问题：发送频率、验证码有效期、不能被暴力破解
+
+#### 发送逻辑：
+1. 没有key，发送
+2. 有key
+    - 没有过期时间，系统异常，拒绝发送
+    - 有过期时间
+      - 多于14分钟（设定key生命15分钟），发送频繁，拒绝发送
+      - 少于14分钟，发送
+#### 验证逻辑
+1. 验证码不存在
+   - 提示发送验证码
+2. 验证码存在
+   - 验证次数小于3
+     - 匹配，确认
+     - 不匹配，返回验证码错误
+   - 验证次数大于3，返回验证码错误
