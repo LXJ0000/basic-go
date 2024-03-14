@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./", // 配置别名路径 // config
     "paths": {
       "@/*": ["./src/*"]
     }
