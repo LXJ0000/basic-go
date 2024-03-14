@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"webook-server/internal/domain"
 	"webook-server/internal/repository/cache"
@@ -26,12 +27,15 @@ func NewUserRepository(dao *dao.UserDao, cache *cache.UserCache) *UserRepository
 }
 
 func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
-	return r.dao.Insert(ctx, dao.User{
-		UserId:   u.UserId,
-		UserName: u.UserName,
-		Email:    u.Email,
-		Password: u.Password,
-	})
+	return r.dao.Insert(ctx, toDao(u))
+}
+
+func (r *UserRepository) FindByPhone(ctx context.Context, phone string) (domain.User, error) {
+	u, err := r.dao.FindByPhone(ctx, phone)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return toDomain(u), nil
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
@@ -60,15 +64,26 @@ func (r *UserRepository) FindByUserId(ctx context.Context, userId int64) (domain
 			log.Println("cache domainUser fail")
 		}
 	}()
-	
+
 	return domainUser, nil
 }
 
 func toDomain(u dao.User) domain.User {
 	return domain.User{
 		UserId:   u.UserId,
-		Email:    u.Email,
+		Email:    u.Email.String,
 		Password: u.Password,
-		UserName: u.UserName,
+		UserName: u.UserName.String,
+		Phone:    u.Phone.String,
+	}
+}
+
+func toDao(u domain.User) dao.User {
+	return dao.User{
+		UserId:   u.UserId,
+		UserName: sql.NullString{String: u.UserName, Valid: u.UserName != ""},
+		Email:    sql.NullString{String: u.Email, Valid: u.Email != ""},
+		Phone:    sql.NullString{String: u.Phone, Valid: u.Phone != ""},
+		Password: u.Password,
 	}
 }

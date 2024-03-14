@@ -14,13 +14,11 @@ import (
 )
 
 const (
+	biz = "login"
+
 	RegexpPassword = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
 	RegexpEmail    = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
 )
-
-type UserToken struct {
-	Token string `json:"token"`
-}
 
 type UserHandler struct {
 	svc            *service.UserService
@@ -39,7 +37,51 @@ func NewUserHandler(svc *service.UserService, codeSvc *service.CodeService) *Use
 }
 
 func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
+	type Req struct {
+		Phone string `json:"phone"`
+		Code  string `json:"code"`
+	}
+	var req Req
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInvalidInput,
+			Msg:  "请求参数有误",
+		})
+		return
+	}
+	ok, err := h.codeSvc.Verify(ctx, biz, req.Phone, req.Code)
+	if err != nil {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInternalServerError,
+			Msg:  "系统错误",
+		})
+		return
+	}
+	if !ok {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInvalidInput,
+			Msg:  "验证码有误",
+		})
+		return
+	}
 
+	user, err := h.svc.FindOrCreate(ctx, req.Phone)
+	if err != nil {
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInternalServerError,
+			Msg:  "系统错误",
+		})
+		return
+	}
+
+	token, _ := jwt.GenToken(ctx, user.UserId, "")
+	ctx.JSON(http.StatusOK, Response{
+		Code: 0,
+		Msg:  "发送成功",
+		Data: gin.H{
+			"token": token,
+		},
+	})
 }
 
 func (h *UserHandler) SendLoginSMSCode(ctx *gin.Context) {
@@ -54,17 +96,24 @@ func (h *UserHandler) SendLoginSMSCode(ctx *gin.Context) {
 		})
 		return
 	}
-	const biz = "login"
-	if err := h.codeSvc.Send(ctx, biz, req.Phone); err != nil {
+	err := h.codeSvc.Send(ctx, biz, req.Phone)
+	switch {
+	case err == nil:
+		ctx.JSON(http.StatusOK, Response{
+			Code: 0,
+			Msg:  "发送成功",
+		})
+	case errors.Is(err, service.ErrCodeSendFrequently):
+		ctx.JSON(http.StatusOK, Response{
+			Code: errs.CodeUserInternalServerError, // todo
+			Msg:  "发送太频繁，请稍后尝试",
+		})
+	default:
 		ctx.JSON(http.StatusOK, Response{
 			Code: errs.CodeUserInternalServerError,
 			Msg:  "系统错误",
 		})
 	}
-	ctx.JSON(http.StatusOK, Response{
-		Code: 0,
-		Msg:  "发送成功",
-	})
 }
 
 func (h *UserHandler) Register(ctx *gin.Context) {
@@ -152,7 +201,9 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, Response{
 			Code: 0,
 			Msg:  "登录成功",
-			Data: UserToken{token},
+			Data: gin.H{
+				"token": token,
+			},
 		})
 	case errors.Is(err, service.ErrInvalidUserOrPassword):
 		ctx.JSON(http.StatusOK, Response{
@@ -178,7 +229,7 @@ func (h *UserHandler) Profile(ctx *gin.Context) {
 		return
 	}
 	user, err := h.svc.Profile(ctx, userId)
-	if err != nil {
+	if err != nil { // todo 正常前端是不会错的，不处理了
 		ctx.JSON(http.StatusOK, Response{
 			Code: errs.CodeUserInternalServerError,
 			Msg:  "系统错误",

@@ -6,6 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"webook-server/internal/domain"
 	"webook-server/internal/repository"
+	"webook-server/pkg/snowflake"
 )
 
 var (
@@ -47,4 +48,19 @@ func (svc *UserService) Login(ctx context.Context, email, password string) (doma
 
 func (svc *UserService) Profile(ctx context.Context, userId int64) (domain.User, error) {
 	return svc.repo.FindByUserId(ctx, userId)
+}
+
+func (svc *UserService) FindOrCreate(ctx context.Context, phone string) (domain.User, error) {
+	u, err := svc.repo.FindByPhone(ctx, phone)
+	if err == nil {
+		return u, nil
+	}
+	u = domain.User{
+		UserId: snowflake.GenID(),
+		Phone:  phone,
+	}
+	if err := svc.repo.Create(ctx, u); err != nil {
+		return domain.User{}, err
+	}
+	return u, nil
 }
