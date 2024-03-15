@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"webook-server/internal/repository"
@@ -36,7 +37,7 @@ func (svc *CodeService) Send(ctx context.Context, biz string, phone string) erro
 
 func (svc *CodeService) Verify(ctx context.Context, biz string, phone string, inputCode string) (bool, error) {
 	ok, err := svc.repo.Verify(ctx, biz, phone, inputCode)
-	if err == repository.ErrCodeVerifyFrequently {
+	if errors.Is(err, repository.ErrCodeVerifyFrequently) {
 		return false, nil
 	}
 	return ok, err
