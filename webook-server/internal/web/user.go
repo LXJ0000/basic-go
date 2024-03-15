@@ -6,12 +6,25 @@ import (
 	"webook-server/errs"
 	"webook-server/internal/domain"
 	"webook-server/internal/service"
+	"webook-server/internal/web/middleware"
 	"webook-server/pkg/jwt"
 	"webook-server/pkg/snowflake"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
 )
+
+func (h *UserHandler) InitRouter(r *gin.Engine) {
+	userGroup := r.Group("/user")
+	userGroup.POST("/login", h.Login)
+	userGroup.POST("/register", h.Register)
+
+	userGroup.POST("login/sms/code", h.SendLoginSMSCode)
+	userGroup.POST("login/sms/verify", h.VerifyLoginSMSCode)
+
+	authUserGroup := userGroup.Use(middleware.JwtAuthMiddleware())
+	authUserGroup.GET("/", h.Profile)
+}
 
 const (
 	biz = "login"

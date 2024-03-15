@@ -127,3 +127,8 @@ go get -v -u github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
      - 匹配，确认
      - 不匹配，返回验证码错误
    - 验证次数大于3，返回验证码错误
+
+## 15. wire
+```bash
+go install github.com/google/wire/cmd/wire@latest
+```
