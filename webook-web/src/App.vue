@@ -1,8 +1,17 @@
+<script setup>
+import { useStore } from "@/stores/store";
+
+const store = useStore();
+
+// 加载userinfo
+store.loadUserInfo();
+</script>
+
 <template>
-<router-view></router-view>
+  <router-view />
 </template>
 
-<style lang="scss">
+<style>
 * {
   padding: 0;
   margin: 0;
