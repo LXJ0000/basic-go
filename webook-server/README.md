@@ -148,3 +148,10 @@ A 依赖于 B，也就是 A 要调用 B 上面的方法，那么 A 在初始化�
 
 ## 19. 控制反转 IOC
 依赖注入 是 控制反转 的一种实现方式，还有一种叫 依赖查找
+
+## 20. mock
+```bash
+go install go.uber.org/mock/mockgen@latest
+
+mockgen -source=./internal/service/user.go -package=svcmock -destination=./internal/service/mocks/user_gen.go
+```

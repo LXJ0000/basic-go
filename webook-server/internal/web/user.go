@@ -56,7 +56,7 @@ func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
 	}
 	var req Req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusOK, Response{
+		ctx.JSON(http.StatusBadRequest, Response{
 			Code: errs.CodeUserInvalidInput,
 			Msg:  "请求参数有误",
 		})
@@ -103,7 +103,7 @@ func (h *UserHandler) SendLoginSMSCode(ctx *gin.Context) {
 	}
 	var req Req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusOK, Response{
+		ctx.JSON(http.StatusBadRequest, Response{
 			Code: errs.CodeUserInvalidInput,
 			Msg:  "请求参数有误",
 		})
@@ -138,7 +138,7 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 	}
 	var req Req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusOK, Response{
+		ctx.JSON(http.StatusBadRequest, Response{
 			Code: errs.CodeUserInvalidInput,
 			Msg:  "请求参数有误",
 		})
@@ -199,7 +199,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	}
 	var req Req
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusOK, Response{
+		ctx.JSON(http.StatusBadRequest, Response{
 			Code: errs.CodeUserInvalidInput,
 			Msg:  "请求参数有误",
 		})
