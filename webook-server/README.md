@@ -132,3 +132,7 @@ go get -v -u github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 ```bash
 go install github.com/google/wire/cmd/wire@latest
 ```
+## 16. 快慢路径
+快路径 触发降级操作，只走快路径 即系统资源不不足，只服务已经注册过的用户
+## 17. 数据库唯一索引问题
+设置唯一字段为 null, sql.NullString, 为什么不使用指针，需要解引用，需要判空

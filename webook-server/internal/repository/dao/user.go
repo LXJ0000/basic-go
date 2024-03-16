@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrDuplicateEmail = errors.New("邮箱或用户名已存在")
+	ErrDuplicate      = errors.New("邮箱或用户名已存在")
 	ErrRecordNotFound = gorm.ErrRecordNotFound
 )
 
@@ -34,7 +34,7 @@ func (dao *UserDao) Insert(ctx context.Context, u User) error {
 	if errors.As(err, &me) {
 		const duplicateErr uint16 = 1062
 		if me.Number == duplicateErr {
-			return ErrDuplicateEmail
+			return ErrDuplicate
 		}
 	}
 	return err

@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrDuplicateEmail        = repository.ErrDuplicateEmail
+	ErrDuplicate             = repository.ErrDuplicate
 	ErrInvalidUserOrPassword = errors.New("用户不存在或者密码不对")
 )
 
@@ -51,6 +51,7 @@ func (svc *UserService) Profile(ctx context.Context, userId int64) (domain.User,
 }
 
 func (svc *UserService) FindOrCreate(ctx context.Context, phone string) (domain.User, error) {
+	//快路径 触发降级操作，只走快路径 即系统资源不不足，只服务已经注册过的用户
 	u, err := svc.repo.FindByPhone(ctx, phone)
 	if err == nil {
 		return u, nil

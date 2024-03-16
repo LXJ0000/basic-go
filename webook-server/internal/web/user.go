@@ -90,7 +90,7 @@ func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
 	token, _ := jwt.GenToken(ctx, user.UserId, "")
 	ctx.JSON(http.StatusOK, Response{
 		Code: 0,
-		Msg:  "发送成功",
+		Msg:  "验证通过",
 		Data: gin.H{
 			"token": token,
 		},
@@ -179,7 +179,7 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 			Code: 0,
 			Msg:  "注册成功",
 		})
-	case errors.Is(err, service.ErrDuplicateEmail):
+	case errors.Is(err, service.ErrDuplicate):
 		ctx.JSON(http.StatusOK, Response{
 			Code: errs.CodeUserNameOrEmailDuplicate,
 			Msg:  "邮箱或用户名已存在",
