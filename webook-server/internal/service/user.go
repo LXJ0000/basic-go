@@ -14,15 +14,22 @@ var (
 	ErrInvalidUserOrPassword = errors.New("用户不存在或者密码不对")
 )
 
-type UserService struct {
-	repo *repository.UserRepository
+type UserService interface {
+	Register(ctx context.Context, u domain.User) error
+	Login(ctx context.Context, email, password string) (domain.User, error)
+	Profile(ctx context.Context, userId int64) (domain.User, error)
+	FindOrCreate(ctx context.Context, phone string) (domain.User, error)
 }
 
-func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{repo: repo}
+type UserServiceByRepo struct {
+	repo repository.UserRepository
 }
 
-func (svc *UserService) Register(ctx context.Context, u domain.User) error {
+func NewUserService(repo repository.UserRepository) UserService {
+	return &UserServiceByRepo{repo: repo}
+}
+
+func (svc *UserServiceByRepo) Register(ctx context.Context, u domain.User) error {
 	encrypted, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -31,7 +38,7 @@ func (svc *UserService) Register(ctx context.Context, u domain.User) error {
 	return svc.repo.Create(ctx, u)
 }
 
-func (svc *UserService) Login(ctx context.Context, email, password string) (domain.User, error) {
+func (svc *UserServiceByRepo) Login(ctx context.Context, email, password string) (domain.User, error) {
 	u, err := svc.repo.FindByEmail(ctx, email)
 	if err == repository.ErrUserNotFound {
 		return domain.User{}, ErrInvalidUserOrPassword
@@ -46,11 +53,11 @@ func (svc *UserService) Login(ctx context.Context, email, password string) (doma
 	return u, nil
 }
 
-func (svc *UserService) Profile(ctx context.Context, userId int64) (domain.User, error) {
+func (svc *UserServiceByRepo) Profile(ctx context.Context, userId int64) (domain.User, error) {
 	return svc.repo.FindByUserId(ctx, userId)
 }
 
-func (svc *UserService) FindOrCreate(ctx context.Context, phone string) (domain.User, error) {
+func (svc *UserServiceByRepo) FindOrCreate(ctx context.Context, phone string) (domain.User, error) {
 	//快路径 触发降级操作，只走快路径 即系统资源不不足，只服务已经注册过的用户
 	u, err := svc.repo.FindByPhone(ctx, phone)
 	if err == nil {

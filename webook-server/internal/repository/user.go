@@ -14,23 +14,30 @@ var (
 	ErrUserNotFound = dao.ErrRecordNotFound
 )
 
-type UserRepository struct {
-	dao   *dao.UserDao
-	cache *cache.UserCache
+type UserRepository interface {
+	Create(ctx context.Context, u domain.User) error
+	FindByPhone(ctx context.Context, phone string) (domain.User, error)
+	FindByEmail(ctx context.Context, email string) (domain.User, error)
+	FindByUserId(ctx context.Context, userId int64) (domain.User, error)
 }
 
-func NewUserRepository(dao *dao.UserDao, cache *cache.UserCache) *UserRepository {
-	return &UserRepository{
+type UserRepositoryByGormAndRedis struct {
+	dao   dao.UserDao
+	cache cache.UserCache
+}
+
+func NewUserRepository(dao dao.UserDao, cache cache.UserCache) UserRepository {
+	return &UserRepositoryByGormAndRedis{
 		dao:   dao,
 		cache: cache,
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
+func (r *UserRepositoryByGormAndRedis) Create(ctx context.Context, u domain.User) error {
 	return r.dao.Insert(ctx, toDao(u))
 }
 
-func (r *UserRepository) FindByPhone(ctx context.Context, phone string) (domain.User, error) {
+func (r *UserRepositoryByGormAndRedis) FindByPhone(ctx context.Context, phone string) (domain.User, error) {
 	u, err := r.dao.FindByPhone(ctx, phone)
 	if err != nil {
 		return domain.User{}, err
@@ -38,7 +45,7 @@ func (r *UserRepository) FindByPhone(ctx context.Context, phone string) (domain.
 	return toDomain(u), nil
 }
 
-func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
+func (r *UserRepositoryByGormAndRedis) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	u, err := r.dao.FindByEmail(ctx, email)
 	if err != nil {
 		return domain.User{}, err
@@ -46,7 +53,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.
 	return toDomain(u), nil
 }
 
-func (r *UserRepository) FindByUserId(ctx context.Context, userId int64) (domain.User, error) {
+func (r *UserRepositoryByGormAndRedis) FindByUserId(ctx context.Context, userId int64) (domain.User, error) {
 	//查询缓存
 	if u, err := r.cache.Get(ctx, userId); err == nil {
 		return u, err

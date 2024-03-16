@@ -1,6 +1,7 @@
 package ioc
 
 import (
+	"github.com/gin-gonic/gin"
 	"webook-server/internal/web"
 	"webook-server/internal/web/middleware"
 )

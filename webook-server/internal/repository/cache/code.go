@@ -19,15 +19,20 @@ var (
 	ErrUnknown              = errors.New("未知错误")
 )
 
-type CodeCache struct {
+type CodeCache interface {
+	Set(ctx context.Context, biz, phone, code string) error
+	Verify(ctx context.Context, biz, phone, code string) (bool, error)
+}
+
+type CodeCacheByRedis struct {
 	cmd redis.Cmdable
 }
 
-func NewCodeCache(cmd redis.Cmdable) *CodeCache {
-	return &CodeCache{cmd: cmd}
+func NewCodeCache(cmd redis.Cmdable) CodeCache {
+	return &CodeCacheByRedis{cmd: cmd}
 }
 
-func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
+func (c *CodeCacheByRedis) Set(ctx context.Context, biz, phone, code string) error {
 	res, err := c.cmd.Eval(ctx, luaSetCode, []string{c.key(biz, phone)}, code).Int()
 	if err != nil {
 		return err
@@ -41,7 +46,7 @@ func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
 	return nil
 }
 
-func (c *CodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, error) {
+func (c *CodeCacheByRedis) Verify(ctx context.Context, biz, phone, code string) (bool, error) {
 	res, err := c.cmd.Eval(ctx, luaVerifyCode, []string{c.key(biz, phone)}, code).Int()
 	if err != nil {
 		return false, err
@@ -57,6 +62,6 @@ func (c *CodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, 
 	return false, ErrUnknown
 }
 
-func (c *CodeCache) key(biz, phone string) string {
+func (c *CodeCacheByRedis) key(biz, phone string) string {
 	return fmt.Sprintf("code:%s:%s", biz, phone) // code:login:[phone]
 }
