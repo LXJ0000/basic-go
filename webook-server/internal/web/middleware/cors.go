@@ -13,12 +13,11 @@ func CorsMiddleware() gin.HandlerFunc {
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true, // 允许带 cookie
 		AllowOriginFunc: func(origin string) bool {
-			if strings.Contains(origin, "http://localhost") {
+			if strings.HasPrefix(origin, "http://localhost") || strings.HasPrefix(origin, "http://127.0.0.1") {
 				return true
 			}
 			return strings.Contains(origin, "www.example.com")
 		},
-		ExposeHeaders: []string{"token"},
-		MaxAge:        12 * time.Hour,
+		MaxAge: 12 * time.Hour,
 	})
 }
