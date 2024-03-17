@@ -17,7 +17,7 @@ var (
 type UserService interface {
 	Register(ctx context.Context, u domain.User) error
 	Login(ctx context.Context, email, password string) (domain.User, error)
-	Profile(ctx context.Context, userId int64) (domain.User, error)
+	Info(ctx context.Context, userId int64) (domain.User, error)
 	FindOrCreate(ctx context.Context, phone string) (domain.User, error)
 }
 
@@ -53,7 +53,7 @@ func (svc *UserServiceByRepo) Login(ctx context.Context, email, password string)
 	return u, nil
 }
 
-func (svc *UserServiceByRepo) Profile(ctx context.Context, userId int64) (domain.User, error) {
+func (svc *UserServiceByRepo) Info(ctx context.Context, userId int64) (domain.User, error) {
 	return svc.repo.FindByUserId(ctx, userId)
 }
 

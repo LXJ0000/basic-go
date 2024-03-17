@@ -74,6 +74,10 @@ type User struct {
 	Phone    sql.NullString `gorm:"unique"`
 
 	Password string
+	NickName string
+	Avatar   string
+	Intro    string
+	WebSite  string
 
 	CreateAt int64
 	UpdateAt int64

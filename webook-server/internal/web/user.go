@@ -15,7 +15,8 @@ import (
 )
 
 func (h *UserHandler) InitRouter(r *gin.Engine) {
-	userGroup := r.Group("/user")
+	userGroup := r.Group("/api/user")
+
 	userGroup.POST("/login", h.Login)
 	userGroup.POST("/register", h.Register)
 
@@ -23,7 +24,7 @@ func (h *UserHandler) InitRouter(r *gin.Engine) {
 	userGroup.POST("login/sms/verify", h.VerifyLoginSMSCode)
 
 	authUserGroup := userGroup.Use(middleware.JwtAuthMiddleware())
-	authUserGroup.GET("/", h.Profile)
+	authUserGroup.GET("/info", h.Info)
 }
 
 const (
@@ -231,7 +232,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	}
 }
 
-func (h *UserHandler) Profile(ctx *gin.Context) {
+func (h *UserHandler) Info(ctx *gin.Context) {
 	userIdRaw, exist := ctx.Get("user_id")
 	userId, ok := userIdRaw.(int64)
 	if !exist || !ok {
@@ -241,7 +242,7 @@ func (h *UserHandler) Profile(ctx *gin.Context) {
 		})
 		return
 	}
-	user, err := h.svc.Profile(ctx, userId)
+	user, err := h.svc.Info(ctx, userId)
 	if err != nil { // todo 正常前端是不会错的，不处理了
 		ctx.JSON(http.StatusOK, Response{
 			Code: errs.CodeUserInternalServerError,
