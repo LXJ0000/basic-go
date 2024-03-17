@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrDuplicate             = repository.ErrDuplicate
-	ErrInvalidUserOrPassword = errors.New("用户不存在或者密码不对")
+	ErrInvalidUserOrPassword = errors.New("用户名或密码不正确")
 )
 
 type UserService interface {
