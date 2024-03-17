@@ -66,7 +66,7 @@ func (r *UserRepositoryByGormAndRedis) FindByUserId(ctx context.Context, userId 
 	domainUser := toDomain(u)
 
 	go func() {
-		if err = r.cache.Set(ctx, domainUser); err != nil {
+		if err = r.cache.Set(ctx, domainUser); err != nil { // 直接忽略错误也ok
 			//todo log
 			log.Println("cache domainUser fail")
 		}
