@@ -20,8 +20,8 @@ const router = useRouter()
 const { query } = useRoute()
 
 const loginForm = reactive({
-  username: 'guest',
-  password: '123456',
+  email: '123@qq.com',
+  password: 'Hello@123',
 })
 
 initLoginInfo()
@@ -30,7 +30,7 @@ initLoginInfo()
 function initLoginInfo() {
   const localLoginInfo = getLocal('loginInfo')
   if (localLoginInfo) {
-    loginForm.username = localLoginInfo.username
+    loginForm.email = localLoginInfo.email
     loginForm.password = localLoginInfo.password
   }
 }
@@ -40,24 +40,24 @@ const isRemember = useStorage('isRemember', false)
 const loading = ref(false)
 
 async function handleLogin() {
-  const { username, password } = loginForm
-  if (!username || !password) {
+  const { email, password } = loginForm
+  if (!email || !password) {
     $message.warning('请输入用户名和密码')
     return
   }
 
-  const doLogin = async (username, password) => {
+  const doLogin = async (email, password) => {
     loading.value = true
 
     // 登录接口
     try {
-      const resp = await api.login({ username, password })
+      const resp = await api.login({ email, password })
       authStore.setToken(resp.data.token)
 
       await userStore.getUserInfo()
       await addDynamicRoutes()
 
-      isRemember ? setLocal('loginInfo', { username, password }) : removeLocal('loginInfo')
+      isRemember ? setLocal('loginInfo', { email, password }) : removeLocal('loginInfo')
       $message.success('登录成功')
 
       // 页面跳转: 根据 URL 中的 redirect 进行跳转
@@ -75,16 +75,16 @@ async function handleLogin() {
     }
   }
 
-  doLogin(username, password)
+  doLogin(email, password)
 
   // 判断是否需要验证码
   // if (JSON.parse(import.meta.env.VITE_USE_CAPTCHA)) {
   //   // 腾讯滑块验证码 (在 index.html 中引入 js 文件)
-  //   const captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async res => res.ret === 0 && doLogin(username, password))
+  //   const captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async res => res.ret === 0 && doLogin(email, password))
   //   captcha.show()
   // }
   // else {
-  // doLogin(username, password)
+  // doLogin(email, password)
   // }
 }
 </script>
@@ -103,7 +103,7 @@ async function handleLogin() {
           <span> {{ title }} </span>
         </h5>
         <NInput
-          v-model:value="loginForm.username"
+          v-model:value="loginForm.email"
           class="h-[50px] items-center pl-2"
           autofocus
           placeholder="test@qq.com"
