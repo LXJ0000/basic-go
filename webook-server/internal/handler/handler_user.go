@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"webook-server/internal/domain"
 	"webook-server/internal/global"
+	"webook-server/internal/middleware"
 	"webook-server/internal/repository"
 	"webook-server/internal/utils/jwt"
 )
@@ -20,9 +21,13 @@ func NewUserHandler(repo repository.UserRepository) *UserHandler {
 }
 
 func (h *UserHandler) InitRouter(r *gin.Engine) {
-	userGroup := r.Group("/api/user")
+	base := r.Group("/api")
 
-	userGroup.POST("/login", h.Login)
+	base.POST("/login", h.Login)
+
+	auth := base.Group("/user").Use(middleware.JwtAuthMiddleware())
+	auth.GET("/info", h.Info)
+
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
@@ -53,6 +58,25 @@ func (h *UserHandler) Login(c *gin.Context) {
 	ReturnSuccess(c, LoginResp{
 		u, token,
 	})
+}
+func (h *UserHandler) Register(c *gin.Context) {
+
+}
+
+func (h *UserHandler) Info(c *gin.Context) {
+	userIdRaw, exist := c.Get("user_id")
+	userId, ok := userIdRaw.(int64)
+	if !exist || !ok {
+		ReturnFail(c, g.ErrUserAuth, "")
+		return
+	}
+	user, err := h.repo.FindByUserId(c, userId)
+	if err != nil { // todo 正常前端是不会错的，不处理了
+		ReturnFail(c, g.ErrDbOp, err.Error())
+		return
+	}
+
+	ReturnSuccess(c, user)
 }
 
 type LoginReq struct {

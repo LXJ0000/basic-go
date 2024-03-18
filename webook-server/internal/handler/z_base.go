@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
-	g "webook-server/internal/global"
+	"webook-server/internal/global"
 )
 
 type Response struct {
