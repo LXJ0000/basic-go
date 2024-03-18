@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-	"webook-server/pkg/jwt"
+	"webook-server/internal/utils/jwt"
 )
 
 func JwtAuthMiddleware() gin.HandlerFunc {

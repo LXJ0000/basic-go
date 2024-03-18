@@ -16,7 +16,6 @@ var (
 
 	ErrCodeSendFrequently   = errors.New("验证码发送过于频繁")
 	ErrCodeVerifyFrequently = errors.New("验证过于频繁")
-	ErrUnknown              = errors.New("未知错误")
 )
 
 type CodeCache interface {
@@ -39,7 +38,7 @@ func (c *CodeCacheByRedis) Set(ctx context.Context, biz, phone, code string) err
 	}
 	switch res {
 	case -2:
-		return ErrUnknown
+		return err
 	case -1:
 		return ErrCodeSendFrequently
 	}
@@ -59,7 +58,7 @@ func (c *CodeCacheByRedis) Verify(ctx context.Context, biz, phone, code string) 
 	case 0:
 		return true, nil
 	}
-	return false, ErrUnknown
+	return false, err
 }
 
 func (c *CodeCacheByRedis) key(biz, phone string) string {

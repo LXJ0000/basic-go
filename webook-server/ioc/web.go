@@ -2,11 +2,11 @@ package ioc
 
 import (
 	"github.com/gin-gonic/gin"
-	"webook-server/internal/web"
-	"webook-server/internal/web/middleware"
+	"webook-server/internal/handler"
+	"webook-server/internal/middleware"
 )
 
-func InitWebServer(middlewares []gin.HandlerFunc, user *web.UserHandler) *gin.Engine {
+func InitWebServer(middlewares []gin.HandlerFunc, user *handler.UserHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/ping", func(c *gin.Context) {

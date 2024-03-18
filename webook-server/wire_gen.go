@@ -8,11 +8,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"webook-server/internal/handler"
 	"webook-server/internal/repository"
 	"webook-server/internal/repository/cache"
 	"webook-server/internal/repository/dao"
-	"webook-server/internal/service"
-	"webook-server/internal/web"
 	"webook-server/ioc"
 )
 
@@ -25,12 +24,7 @@ func InitWebServer() *gin.Engine {
 	cmdable := ioc.InitRedis()
 	userCache := cache.NewUserCache(cmdable)
 	userRepository := repository.NewUserRepository(userDao, userCache)
-	userService := service.NewUserService(userRepository)
-	codeCache := cache.NewCodeCache(cmdable)
-	codeRepository := repository.NewCodeRepository(codeCache)
-	smsService := ioc.InitSMSService()
-	codeService := service.NewCodeService(codeRepository, smsService)
-	userHandler := web.NewUserHandler(userService, codeService)
+	userHandler := handler.NewUserHandler(userRepository)
 	engine := ioc.InitWebServer(v, userHandler)
 	return engine
 }

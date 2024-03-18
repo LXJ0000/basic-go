@@ -1,7 +1,10 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"webook-server/internal/model"
+)
 
 func InitTable(db *gorm.DB) error {
-	return db.AutoMigrate(&User{})
+	return db.AutoMigrate(&model.User{})
 }

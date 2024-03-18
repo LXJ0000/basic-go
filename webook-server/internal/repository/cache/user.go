@@ -9,10 +9,6 @@ import (
 	"webook-server/internal/domain"
 )
 
-var (
-	ErrKeyNotExist = redis.Nil
-)
-
 type UserCache interface {
 	Get(ctx context.Context, userId int64) (domain.User, error)
 	Set(ctx context.Context, user domain.User) error
@@ -35,7 +31,7 @@ func (c *UserCacheByRedis) Get(ctx context.Context, userId int64) (domain.User, 
 	key := c.Key(userId)
 	val, err := c.cmd.Get(ctx, key).Bytes()
 	if err != nil {
-		return domain.User{}, ErrKeyNotExist
+		return domain.User{}, err
 	}
 	var user domain.User
 	err = json.Unmarshal(val, &user)
