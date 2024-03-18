@@ -21,6 +21,15 @@ export const basicRoutes = [
     },
   },
   {
+    name: 'Register',
+    path: '/register',
+    component: () => import('@/views/Register.vue'),
+    isHidden: true,
+    meta: {
+      title: '注册页',
+    },
+  },
+  {
     name: '404',
     path: '/404',
     component: () => import('@/views/error-page/404.vue'),

@@ -28,7 +28,7 @@ function createPermissionGuard(router) {
     // 没有 Token
     if (!token) {
       // login 和 404 不需要 token 即可访问
-      if (['/login', '/404'].includes(to.path)) {
+      if (['/login', '/404', '/register'].includes(to.path)) {
         return true
       }
 

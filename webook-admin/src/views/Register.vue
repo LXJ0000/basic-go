@@ -6,76 +6,63 @@ import { NButton, NCheckbox, NInput } from 'naive-ui'
 
 import AppPage from '@/components/common/AppPage.vue'
 
-import { addDynamicRoutes } from '@/router'
-import { getLocal, removeLocal, setLocal } from '@/utils'
-import { useAuthStore, useUserStore } from '@/store'
-import api from '@/api'
+import { addDynamicRoutes } from '@/router/index.js'
+import { getLocal, removeLocal, setLocal } from '@/utils/index.js'
+import { useAuthStore, useUserStore } from '@/store/index.js'
+import api from '@/api.js'
 
 const title = import.meta.env.VITE_TITLE // 环境变量中读取
 
-const userStore = useUserStore()
-const authStore = useAuthStore()
+// const userStore = useUserStore()
+// const authStore = useAuthStore()
 
 const router = useRouter()
-const { query } = useRoute()
+// const { query } = useRoute()
 
-const loginForm = reactive({
+const registerForm = reactive({
   email: '123@qq.com',
   password: 'Hello@123',
+  confirm_password: 'Hello@123',
 })
 
-initLoginInfo()
-
-// 从 localStorage 中获取记住的用户名和密码
-function initLoginInfo() {
-  const localLoginInfo = getLocal('loginInfo')
-  if (localLoginInfo) {
-    loginForm.email = localLoginInfo.email
-    loginForm.password = localLoginInfo.password
-  }
-}
-
 // Reactive LocalStorage/SessionStorage - vueuse
-const isRemember = useStorage('isRemember', false)
 const loading = ref(false)
 
-async function handleLogin() {
-  const { email, password } = loginForm
-  if (!email || !password) {
+async function handleRegister() {
+  const { email, password, confirm_password } = registerForm
+  if (!email || !password || !confirm_password) {
     $message.warning('请输入用户名和密码')
     return
   }
 
-  const doLogin = async (email, password) => {
+  const doRegister = async (email, password, confirm_password) => {
     loading.value = true
 
     // 登录接口
     try {
-      const resp = await api.login({ email, password })
-      authStore.setToken(resp.data.token)
-
-      await userStore.getUserInfo()
-      await addDynamicRoutes()
-
-      isRemember ? setLocal('loginInfo', { email, password }) : removeLocal('loginInfo')
-      $message.success('登录成功')
+      const resp = await api.register({ email, password, confirm_password })
+      // authStore.setToken(resp.data.token)
+      // await userStore.getUserInfo()
+      // await addDynamicRoutes()
+      console.log(resp)
+      $message.success('注册成功')
 
       // 页面跳转: 根据 URL 中的 redirect 进行跳转
-      if (query.redirect) {
-        const path = query.redirect
-        Reflect.deleteProperty(query, 'redirect') // 从对象身上删除属性
-        router.push({ path, query })
-      }
-      else {
-        router.push('/')
-      }
+      // if (query.redirect) {
+      //   const path = query.redirect
+      //   Reflect.deleteProperty(query, 'redirect') // 从对象身上删除属性
+      //   router.push({ path, query })
+      // }
+      // else {
+      router.push('/login')
+      // }
     }
     finally {
       loading.value = false
     }
   }
 
-  doLogin(email, password)
+  doRegister(email, password, confirm_password)
 
   // 判断是否需要验证码
   // if (JSON.parse(import.meta.env.VITE_USE_CAPTCHA)) {
@@ -103,35 +90,37 @@ async function handleLogin() {
           <span> {{ title }} </span>
         </h5>
         <NInput
-          v-model:value="loginForm.email"
+          v-model:value="registerForm.email"
           class="h-[50px] items-center pl-2"
           autofocus
-          placeholder="test@qq.com"
+          placeholder="123@qq.com"
           :maxlength="20"
         />
         <NInput
-          v-model:value="loginForm.password"
+          v-model:value="registerForm.password"
           class="h-[50px] items-center pl-2"
           type="password"
           show-password-on="mousedown"
-          placeholder="11111"
+          placeholder="Hello@world123"
           :maxlength="20"
-          @keydown.enter="handleLogin"
         />
-        <NCheckbox
-          :checked="isRemember"
-          label="记住我"
-          :on-update:checked="(val) => (isRemember = val)"
+        <NInput
+          v-model:value="registerForm.confirm_password"
+          class="h-[50px] items-center pl-2"
+          type="password"
+          show-password-on="mousedown"
+          placeholder="Hello@world123"
+          :maxlength="20"
+          @keydown.enter="handleRegister"
         />
         <NButton
           class="h-[50px] w-full rounded-5"
           type="primary"
           :loading="loading"
-          @click="handleLogin"
+          @click="handleRegister"
         >
-          登录
+          注册
         </NButton>
-        <a href="/register" class="text-sm text-blue-500">没有账号？点击这里注册</a>
       </div>
     </div>
   </AppPage>

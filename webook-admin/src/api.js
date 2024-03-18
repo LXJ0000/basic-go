@@ -4,6 +4,7 @@ export default {
   // refreshToken: () => request.post('/auth/refreshToken', null, { noNeedTip: true }),
   report: () => request.post('/report'), // 上报用户信息
   getHomeInfo: () => request.get('/home'), // 获取首页信息
+  register: ({ email, password, confirm_password }) => request.post('/user/register', { email, password, confirm_password }, { noNeedToken: true }),
   login: ({ email, password }) => request.post('/user/login', { email, password }, { noNeedToken: true }),
   logout: () => request.get('/logout'),
 
