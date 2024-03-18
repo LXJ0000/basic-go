@@ -55,9 +55,14 @@ var (
 	ErrRedisOp  = RegisterResult(1003, "Redis 操作异常")
 	ErrUserAuth = RegisterResult(1004, "用户认证异常")
 
-	ErrPassword     = RegisterResult(2001, "密码有误")
-	ErrUserNotExist = RegisterResult(2002, "该用户不存在")
-	ErrOldPassword  = RegisterResult(2003, "旧密码不正确")
+	ErrPassword              = RegisterResult(2001, "密码有误")
+	ErrUserNotExist          = RegisterResult(2002, "该用户不存在")
+	ErrOldPassword           = RegisterResult(2003, "旧密码不正确")
+	ErrPasswordsInconsistent = RegisterResult(2004, "密码不一致")
+	ErrEmailFormatWrong      = RegisterResult(2005, "非法邮箱格式")
+	ErrPasswordStrength      = RegisterResult(2006, "密码必须包含字母、数字、特殊字符，并且不少于八位")
+	ErrBcryptFail            = RegisterResult(2007, "加密失败")
+	ErrUserExist             = RegisterResult(2008, "邮箱或用户名已存在")
 
 	ErrCodeSendFrequently   = RegisterResult(3001, "验证码发送过于频繁")
 	ErrCodeVerifyFrequently = RegisterResult(3002, "验证过于频繁")

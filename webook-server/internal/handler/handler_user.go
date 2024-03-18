@@ -2,6 +2,8 @@ package handler
 
 import (
 	"errors"
+
+	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -10,6 +12,7 @@ import (
 	"webook-server/internal/middleware"
 	"webook-server/internal/repository"
 	"webook-server/internal/utils/jwt"
+	"webook-server/internal/utils/snowflake"
 )
 
 type UserHandler struct {
@@ -24,6 +27,7 @@ func (h *UserHandler) InitRouter(r *gin.Engine) {
 	base := r.Group("/api")
 
 	base.POST("/login", h.Login)
+	base.POST("/register", h.Register)
 
 	auth := base.Group("/user").Use(middleware.JwtAuthMiddleware())
 	auth.GET("/info", h.Info)
@@ -60,7 +64,52 @@ func (h *UserHandler) Login(c *gin.Context) {
 	})
 }
 func (h *UserHandler) Register(c *gin.Context) {
+	var req RegisterReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ReturnFail(c, g.ErrRequest, err.Error())
+		return
+	}
 
+	const (
+		RegexpPassword = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
+		RegexpEmail    = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
+	)
+	var (
+		emailRegexp    = regexp.MustCompile(RegexpEmail, regexp.None)
+		passwordRegexp = regexp.MustCompile(RegexpPassword, regexp.None)
+	)
+	if isEmail, _ := emailRegexp.MatchString(req.Email); !isEmail {
+		ReturnFail(c, g.ErrEmailFormatWrong, "")
+		return
+	}
+	if req.Password != req.ConfirmPassword {
+		ReturnFail(c, g.ErrPasswordsInconsistent, "")
+		return
+	}
+	if isPassword, _ := passwordRegexp.MatchString(req.Password); !isPassword {
+		// todo 密码强度
+	}
+
+	encrypted, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		ReturnFail(c, g.ErrBcryptFail, err.Error())
+		return
+	}
+	u := domain.User{
+		UserId:   snowflake.GenID(),
+		Email:    req.Email,
+		Password: string(encrypted),
+	}
+	if err := h.repo.Create(c, u); err != nil {
+		//todo 判断数据库异常 还是 用户已存在 Create 异常
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			ReturnFail(c, g.ErrUserExist, err.Error())
+			return
+		}
+		ReturnFail(c, g.ErrDbOp, err.Error())
+		return
+	}
+	ReturnSuccess(c, nil)
 }
 
 func (h *UserHandler) Info(c *gin.Context) {
@@ -82,6 +131,11 @@ func (h *UserHandler) Info(c *gin.Context) {
 type LoginReq struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+type RegisterReq struct {
+	Email           string `json:"email" binding:"required"`
+	Password        string `json:"password" binding:"required"`
+	ConfirmPassword string `json:"confirm_password" binding:"required"`
 }
 type LoginResp struct {
 	domain.User
