@@ -62,7 +62,7 @@ func TestUserServiceByRepo_Login(t *testing.T) {
 }
 
 func TestGenerateFromPassword(t *testing.T) {
-	encrypted, err := bcrypt.GenerateFromPassword([]byte("hello@world123"), bcrypt.DefaultCost)
+	encrypted, err := bcrypt.GenerateFromPassword([]byte("Hello@123"), bcrypt.DefaultCost)
 	if err == nil {
 		t.Log(string(encrypted))
 	}
