@@ -6,7 +6,7 @@ local code = redis.call("get", key)
 local cnt = tonumber(redis.call("get", cntKey))
 
 if cnt == nil or cnt <= 0 then
-    return -1
+    return -1 -- 用户输入错误，没有机会
 end
 if expectedCode == code then
     redis.call("del", cntKey)

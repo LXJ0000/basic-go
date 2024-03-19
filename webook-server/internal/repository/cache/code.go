@@ -50,12 +50,13 @@ func (c *CodeCacheByRedis) Verify(ctx context.Context, biz, phone, code string) 
 	if err != nil {
 		return false, err
 	}
+	//ok 正确与否 err 是否还可以重试
 	switch res {
-	case -2:
-		return false, err
-	case -1:
+	case -2: // 错误 还有机会
+		return false, nil
+	case -1: // 错误 没有机会
 		return false, ErrCodeVerifyFrequently
-	case 0:
+	case 0: // 正确
 		return true, nil
 	}
 	return false, err

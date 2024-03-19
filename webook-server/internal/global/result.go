@@ -66,6 +66,7 @@ var (
 
 	ErrCodeSendFrequently   = RegisterResult(3001, "验证码发送过于频繁")
 	ErrCodeVerifyFrequently = RegisterResult(3002, "验证过于频繁")
+	ErrCodeWrong            = RegisterResult(3003, "验证码有误")
 
 	ErrTokenNotExist = RegisterResult(4001, "TOKEN 不存在，请重新登陆")
 	ErrTokenRuntime  = RegisterResult(4002, "TOKEN 已过期，请重新登陆")

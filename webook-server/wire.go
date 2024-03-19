@@ -16,12 +16,13 @@ func InitWebServer() *gin.Engine {
 	wire.Build(
 		//第三方依赖
 		ioc.InitDB, ioc.InitRedis,
+		ioc.InitSMSService,
 		//dao
 		dao.NewUserDao,
 		//cache
-		cache.NewUserCache,
+		cache.NewUserCache, cache.NewCodeCache,
 		//repository
-		repository.NewUserRepository,
+		repository.NewUserRepository, repository.NewCodeRepository,
 		//service
 		handler.NewUserHandler,
 
