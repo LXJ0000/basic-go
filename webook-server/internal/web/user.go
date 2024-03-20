@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"webook-server/errs"
 	"webook-server/internal/domain"
 	"webook-server/internal/service"
@@ -14,17 +15,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *UserHandler) InitRouter(r *gin.Engine) {
-	userGroup := r.Group("/api/user")
+func (h *UserHandler) InitRouter(r *gin.Engine, auth *middleware.AuthMiddleware) {
+	userGroup := r.Group("/api")
 
 	userGroup.POST("/login", h.Login)
 	userGroup.POST("/register", h.Register)
 
-	userGroup.POST("login/sms/code", h.SendLoginSMSCode)
+	userGroup.POST("login/sms/sent", h.SendLoginSMSCode)
 	userGroup.POST("login/sms/verify", h.VerifyLoginSMSCode)
 
-	authUserGroup := userGroup.Use(middleware.JwtAuthMiddleware())
-	authUserGroup.GET("/info", h.Info)
+	authUserGroup := userGroup.Use(auth.JwtAuthMiddleware())
+	authUserGroup.GET("user/info", h.Info)
+	authUserGroup.POST("user/logout", h.Logout)
+	authUserGroup.GET("user/refresh_token", h.RefreshToken)
 }
 
 const (
@@ -35,19 +38,67 @@ const (
 )
 
 type UserHandler struct {
-	svc            service.UserService
-	codeSvc        service.CodeService
+	svc     service.UserService
+	codeSvc service.CodeService
+
 	emailRegexp    *regexp.Regexp
 	passwordRegexp *regexp.Regexp
+
+	jwtHandler jwt.JWTHandler
 }
 
-func NewUserHandler(svc service.UserService, codeSvc service.CodeService) *UserHandler {
+func NewUserHandler(svc service.UserService, codeSvc service.CodeService, jwtHandler jwt.JWTHandler) *UserHandler {
 	return &UserHandler{
 		svc:            svc,
 		codeSvc:        codeSvc,
 		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
 		passwordRegexp: regexp.MustCompile(RegexpPassword, regexp.None),
+		jwtHandler:     jwtHandler,
 	}
+}
+
+func (h *UserHandler) Logout(ctx *gin.Context) {
+	if err := h.jwtHandler.InvalidateToken(ctx); err != nil {
+		ctx.String(http.StatusOK, "fail")
+		return
+	}
+	ctx.String(http.StatusOK, "ok")
+}
+
+func (h *UserHandler) RefreshToken(ctx *gin.Context) {
+	// Authorization 获取 refreshToken
+	authHeader := ctx.Request.Header.Get("Authorization")
+	if authHeader == "" {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	parts := strings.SplitN(authHeader, " ", 2)
+	if !(len(parts) == 2 && parts[0] == "Bearer") {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	claim, err := h.jwtHandler.ParseRefreshToken(ctx, parts[1])
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if claim.UserAgent != ctx.Request.UserAgent() { // 安全问题 todo 采集前端信息增强系统安全型
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if err = h.jwtHandler.CheckSsid(ctx, claim.SSID); err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	accessToken, err := h.jwtHandler.GenAccessToken(ctx, claim.UserID, claim.Username, claim.SSID)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"access_token": accessToken,
+	})
+
 }
 
 func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
@@ -87,13 +138,13 @@ func (h *UserHandler) VerifyLoginSMSCode(ctx *gin.Context) {
 		})
 		return
 	}
-
-	token, _ := jwt.GenToken(ctx, user.UserId, "")
+	access, refresh := h.jwtHandler.DealLoginToken(ctx, user.UserId, "")
 	ctx.JSON(http.StatusOK, Response{
 		Code: 0,
 		Msg:  "验证通过",
 		Data: gin.H{
-			"token": token,
+			"access_token":  access,
+			"refresh_token": refresh,
 		},
 	})
 }
@@ -211,12 +262,13 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 
 	switch {
 	case err == nil:
-		token, _ := jwt.GenToken(ctx, user.UserId, user.UserName)
+		access, refresh := h.jwtHandler.DealLoginToken(ctx, user.UserId, "")
 		ctx.JSON(http.StatusOK, Response{
 			Code: 0,
 			Msg:  "登录成功",
 			Data: gin.H{
-				"token": token,
+				"access_token":  access,
+				"refresh_token": refresh,
 			},
 		})
 	case errors.Is(err, service.ErrInvalidUserOrPassword):

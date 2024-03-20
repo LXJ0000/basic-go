@@ -13,7 +13,9 @@ import (
 	"webook-server/internal/repository/dao"
 	"webook-server/internal/service"
 	"webook-server/internal/web"
+	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
+	"webook-server/pkg/jwt"
 )
 
 // Injectors from wire.go:
@@ -30,7 +32,9 @@ func InitWebServer() *gin.Engine {
 	codeRepository := repository.NewCodeRepository(codeCache)
 	smsService := ioc.InitSMSService()
 	codeService := service.NewCodeService(codeRepository, smsService)
-	userHandler := web.NewUserHandler(userService, codeService)
-	engine := ioc.InitWebServer(v, userHandler)
+	jwtHandler := jwt.NewCacheJWTHandler(cmdable)
+	userHandler := web.NewUserHandler(userService, codeService, jwtHandler)
+	authMiddleware := middleware.NewAuthMiddleware(jwtHandler)
+	engine := ioc.InitWebServer(v, userHandler, authMiddleware)
 	return engine
 }

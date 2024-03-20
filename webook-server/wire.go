@@ -10,7 +10,9 @@ import (
 	"webook-server/internal/repository/dao"
 	"webook-server/internal/service"
 	"webook-server/internal/web"
+	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
+	"webook-server/pkg/jwt"
 )
 
 func InitWebServer() *gin.Engine {
@@ -29,6 +31,8 @@ func InitWebServer() *gin.Engine {
 		//handler
 		web.NewUserHandler,
 
+		jwt.NewCacheJWTHandler,
+		middleware.NewAuthMiddleware,
 		ioc.InitGinMiddlewares,
 		ioc.InitWebServer,
 	)
