@@ -85,8 +85,11 @@ func (h *CacheJWTHandler) DealLoginToken(ctx *gin.Context, userId int64, userNam
 func (h *CacheJWTHandler) CheckSsid(ctx *gin.Context, ssid string) error {
 	cnt, err := h.cmd.Exists(ctx, h.Key(ssid)).Result()
 	if err != nil {
-		return err
-	} // redis 出错
+		if err == redis.Nil {
+			return nil // session 不存在 token 有效
+		}
+		return err // redisOp err
+	}
 	if cnt > 0 {
 		return errors.New("invalid token")
 	} // 无效
