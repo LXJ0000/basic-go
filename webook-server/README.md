@@ -155,3 +155,13 @@ go install go.uber.org/mock/mockgen@latest
 
 mockgen -source=./internal/service/user.go -package=svcmock -destination=./internal/service/mocks/user_gen.go
 ```
+
+## 21. 技术选型
+1. 功能性：覆盖需求
+2. 社区和支持度：活跃社区、文档齐全、搜索引擎..
+3. 非功能性：易用、用户友好、扩展性（定制）、性能
+
+## 22. 配置模块
+```bash
+go get github.com/spf13/viper
+```
