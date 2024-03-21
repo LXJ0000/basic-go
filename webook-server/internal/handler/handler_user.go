@@ -1,14 +1,15 @@
 package handler
 
 import (
+	"database/sql"
 	"errors"
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"webook-server/internal/domain"
 	"webook-server/internal/global"
 	"webook-server/internal/middleware"
+	"webook-server/internal/model"
 	"webook-server/internal/repository"
 	"webook-server/internal/utils/jwt"
 	"webook-server/internal/utils/sms"
@@ -26,8 +27,8 @@ type UserHandler struct {
 	sms      sms.Service
 }
 
-func NewUserHandler(userRepo repository.UserRepository, codeRepo repository.CodeRepository, sms sms.Service) *UserHandler {
-	return &UserHandler{userRepo: userRepo, codeRepo: codeRepo, sms: sms}
+func NewUserHandler(userRepo repository.UserRepository, codeRepo repository.CodeRepository, sms sms.Service) UserHandler {
+	return UserHandler{userRepo: userRepo, codeRepo: codeRepo, sms: sms}
 }
 
 func (h *UserHandler) InitRouter(r *gin.Engine) {
@@ -49,7 +50,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 	type Resp struct {
-		domain.User
+		model.User
 		Token string `json:"token"`
 	}
 	var req Req
@@ -71,7 +72,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		ReturnFail(c, g.ErrPassword, err.Error())
 		return
 	}
-	token, err := jwt.GenToken(c, u.UserId, u.UserName)
+	token, err := jwt.GenToken(c, u.UserId, u.UserName.String)
 	if err != nil {
 		ReturnFail(c, g.ErrTokenCreate, err.Error())
 		return
@@ -117,9 +118,12 @@ func (h *UserHandler) Register(c *gin.Context) {
 		ReturnFail(c, g.ErrBcryptFail, err.Error())
 		return
 	}
-	u := domain.User{
-		UserId:   snowflake.GenID(),
-		Email:    req.Email,
+	u := model.User{
+		UserId: snowflake.GenID(),
+		Email: sql.NullString{
+			String: req.Email,
+			Valid:  true,
+		},
 		Password: string(encrypted),
 	}
 	if err := h.userRepo.Create(c, u); err != nil {
@@ -136,7 +140,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 func (h *UserHandler) Info(c *gin.Context) {
 	type Resp struct {
-		domain.User
+		model.User
 		//	todo 看前端需求
 	}
 	userIdRaw, exist := c.Get("user_id")
@@ -161,7 +165,7 @@ func (h *UserHandler) VerifyLoginSMSCode(c *gin.Context) {
 		Code  string `json:"code"`
 	}
 	type Resp struct {
-		domain.User
+		model.User
 		Token string `json:"token"`
 	}
 	var req Req
@@ -187,16 +191,19 @@ func (h *UserHandler) VerifyLoginSMSCode(c *gin.Context) {
 	//FindOrCreate user
 	u, err := h.userRepo.FindByPhone(c, req.Phone)
 	if err != nil { // 用户不存在
-		u = domain.User{
+		u = model.User{
 			UserId: snowflake.GenID(),
-			Phone:  req.Phone,
+			Phone: sql.NullString{
+				String: req.Phone,
+				Valid:  true,
+			},
 		}
 		if err = h.userRepo.Create(c, u); err != nil {
 			ReturnFail(c, g.ErrDbOp, err.Error())
 			return
 		}
 	}
-	token, err := jwt.GenToken(c, u.UserId, u.UserName)
+	token, err := jwt.GenToken(c, u.UserId, u.UserName.String)
 	if err != nil {
 		ReturnFail(c, g.ErrTokenCreate, err.Error())
 		return

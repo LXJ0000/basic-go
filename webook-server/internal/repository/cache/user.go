@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
-	"webook-server/internal/domain"
+	"webook-server/internal/model"
 )
 
 type UserCache interface {
-	Get(ctx context.Context, userId int64) (domain.User, error)
-	Set(ctx context.Context, user domain.User) error
+	Get(ctx context.Context, userId int64) (model.User, error)
+	Set(ctx context.Context, user model.User) error
 }
 
 type UserCacheByRedis struct {
@@ -27,19 +27,19 @@ func NewUserCache(client redis.Cmdable) UserCache {
 }
 
 // Get 1. error = nil 则认为缓存击中 2. 如果没有数据返回特定 error 3. 如果系统出错 直接return error
-func (c *UserCacheByRedis) Get(ctx context.Context, userId int64) (domain.User, error) {
+func (c *UserCacheByRedis) Get(ctx context.Context, userId int64) (model.User, error) {
 	key := c.Key(userId)
 	val, err := c.cmd.Get(ctx, key).Bytes()
 	if err != nil {
-		return domain.User{}, err
+		return model.User{}, err
 	}
-	var user domain.User
+	var user model.User
 	err = json.Unmarshal(val, &user)
 	return user, err
 
 }
 
-func (c *UserCacheByRedis) Set(ctx context.Context, user domain.User) error {
+func (c *UserCacheByRedis) Set(ctx context.Context, user model.User) error {
 	val, err := json.Marshal(user)
 	if err != nil {
 		return err
