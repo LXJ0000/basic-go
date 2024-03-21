@@ -165,3 +165,11 @@ mockgen -source=./internal/service/user.go -package=svcmock -destination=./inter
 ```bash
 go get github.com/spf13/viper
 ```
+## 23. etcd
+```bash
+git clone git@github.com:etcd-io/etcd.git
+cd etcdctl/
+go install .
+
+etcdctl --endpoints=127.0.0.1:23790 put /webook "$(<dev.yaml)"
+```
