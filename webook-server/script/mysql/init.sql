@@ -25,5 +25,5 @@ CREATE TABLE `user` (
 
 
 insert into user(id, user_id, user_name, email, phone, password, nick_name, avatar, intro, web_site, create_at, update_at) values
-    (1, 1, "root", "123@qq.com", "181", "$2a$10$rjf2o1.L2bxl.eazco6Ha.phrpxrQIROcxdEAkO9p9QCEMjJ2bG5.",
+    (1, 1, "root", "123@qq.com", "181", "$2a$10$hvhqvCaBxA22R1s0D.gMMePhf6WQS6TQvlH9JKu36BLJMFcxVwcRy",
      "root", "", "Hello World", "www.jannan.top", unix_timestamp(), unix_timestamp());

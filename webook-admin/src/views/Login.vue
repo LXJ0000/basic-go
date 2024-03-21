@@ -20,7 +20,7 @@ const router = useRouter()
 const { query } = useRoute()
 
 const loginForm = reactive({
-  email: '123@qq.com',
+  email: 'test@qq.com',
   password: 'Hello@123',
 })
 
