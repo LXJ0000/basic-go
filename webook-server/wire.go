@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"time"
 	"webook-server/internal/repository"
 	"webook-server/internal/repository/cache"
 	"webook-server/internal/repository/dao"
@@ -13,9 +14,10 @@ import (
 	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
 	"webook-server/pkg/jwt"
+	"webook-server/pkg/ratelimit"
 )
 
-func InitWebServer() *gin.Engine {
+func InitWebServer(window time.Duration, rate int) *gin.Engine {
 	wire.Build(
 		//第三方依赖
 		ioc.InitDB, ioc.InitRedis,
@@ -32,7 +34,12 @@ func InitWebServer() *gin.Engine {
 		web.NewUserHandler,
 
 		jwt.NewCacheJWTHandler,
+		//wire.Value(window),
+		//wire.Value(rate),
+		ratelimit.NewCacheSliceWindowLimiter,
 		middleware.NewAuthMiddleware,
+		middleware.NewRateLimitMiddleware,
+
 		ioc.InitGinMiddlewares,
 		ioc.InitWebServer,
 	)

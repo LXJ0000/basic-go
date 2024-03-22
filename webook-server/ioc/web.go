@@ -12,14 +12,14 @@ func InitWebServer(middlewares []gin.HandlerFunc, user *web.UserHandler, auth *m
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})
-
 	r.Use(middlewares...)
 	user.InitRouter(r, auth)
 	return r
 }
 
-func InitGinMiddlewares() []gin.HandlerFunc {
+func InitGinMiddlewares(rate *middleware.RateLimitMiddleware) []gin.HandlerFunc {
 	return []gin.HandlerFunc{
 		middleware.CorsMiddleware(),
+		rate.RateLimitMiddleware(),
 	}
 }

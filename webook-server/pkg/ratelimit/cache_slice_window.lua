@@ -13,6 +13,6 @@ if cnt >= rate then
     return "true" -- 限流
 else
     redis.call("ZADD", key, r, r) -- ZADD KEY_NAME SCORE1 VALUE1
-    redis.call("PEXIRE", key, window) -- 毫秒数 用户不在访问，清理
+    redis.call("PEXPIRE", key, window) -- 毫秒数 用户不在访问，清理
     return "false" -- 不限流
 end

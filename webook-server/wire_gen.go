@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"time"
 	"webook-server/internal/repository"
 	"webook-server/internal/repository/cache"
 	"webook-server/internal/repository/dao"
@@ -16,15 +17,22 @@ import (
 	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
 	"webook-server/pkg/jwt"
+	"webook-server/pkg/ratelimit"
+)
+
+import (
+	_ "github.com/spf13/viper/remote"
 )
 
 // Injectors from wire.go:
 
-func InitWebServer() *gin.Engine {
-	v := ioc.InitGinMiddlewares()
+func InitWebServer(window time.Duration, rate int) *gin.Engine {
+	cmdable := ioc.InitRedis()
+	rateLimit := ratelimit.NewCacheSliceWindowLimiter(cmdable, window, rate)
+	rateLimitMiddleware := middleware.NewRateLimitMiddleware(rateLimit)
+	v := ioc.InitGinMiddlewares(rateLimitMiddleware)
 	db := ioc.InitDB()
 	userDao := dao.NewUserDao(db)
-	cmdable := ioc.InitRedis()
 	userCache := cache.NewUserCache(cmdable)
 	userRepository := repository.NewUserRepository(userDao, userCache)
 	userService := service.NewUserService(userRepository)
