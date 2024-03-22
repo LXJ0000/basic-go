@@ -23,6 +23,7 @@ func (h *CacheJWTHandler) GenRefreshToken(ctx *gin.Context, userID int64, userna
 		UserID:    userID,
 		Username:  username,
 		UserAgent: ctx.Request.UserAgent(),
+		SSID:      ssid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "Jannan",
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshExp)),
@@ -85,7 +86,7 @@ func (h *CacheJWTHandler) DealLoginToken(ctx *gin.Context, userId int64, userNam
 func (h *CacheJWTHandler) CheckSsid(ctx *gin.Context, ssid string) error {
 	cnt, err := h.cmd.Exists(ctx, h.Key(ssid)).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return nil // session 不存在 token 有效
 		}
 		return err // redisOp err
