@@ -8,7 +8,9 @@ import (
 )
 
 func InitDB() *gorm.DB {
-	db, err := gorm.Open(mysql.Open(config.Config.DB.DSN))
+	db, err := gorm.Open(mysql.Open(config.Config.DB.DSN), &gorm.Config{
+		Logger: nil,
+	})
 	if err != nil {
 		panic(err)
 	}
