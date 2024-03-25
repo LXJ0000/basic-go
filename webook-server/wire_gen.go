@@ -31,6 +31,10 @@ func InitWebServer() *gin.Engine {
 	menuDao := dao.NewMenuDao(db)
 	menuRepository := repository.NewMenuRepository(menuDao)
 	menuHandler := handler.NewMenuHandler(menuRepository)
-	engine := ioc.InitWebServer(v, userHandler, menuHandler)
+	daoDao := dao.NewCommonDao(db)
+	cacheCache := cache.NewCommonCache(cmdable)
+	repositoryRepository := repository.NewCommonRepository(daoDao, cacheCache)
+	blogInfoHandler := handler.NewBlogInfoHandler(repositoryRepository)
+	engine := ioc.InitWebServer(v, userHandler, menuHandler, blogInfoHandler)
 	return engine
 }

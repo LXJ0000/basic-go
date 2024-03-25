@@ -7,15 +7,15 @@ type User struct {
 
 	UserId int64 `gorm:"unique"`
 
-	UserName sql.NullString `gorm:"unique"`
-	Email    sql.NullString `gorm:"unique"`
-	Phone    sql.NullString `gorm:"unique"`
+	UserName sql.NullString `gorm:"unique" json:"user_name"`
+	Email    sql.NullString `gorm:"unique" json:"email"`
+	Phone    sql.NullString `gorm:"unique" json:"phone"`
 
-	Password string
-	NickName string
-	Avatar   string
-	Intro    string
-	WebSite  string
+	Password string `json:"password"`
+	NickName string `json:"nick_name"`
+	Avatar   string `json:"avatar"`
+	Intro    string `json:"intro"`
+	WebSite  string `json:"web_site"`
 }
 
 func (u *User) TableName() string {

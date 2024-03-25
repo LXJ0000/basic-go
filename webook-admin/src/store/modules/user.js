@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     userInfo: {
       id: null,
-      nickname: '',
+      nick_name: '',
       avatar: '',
       intro: '',
       website: '',
@@ -16,7 +16,7 @@ export const useUserStore = defineStore('user', {
   }),
   getters: {
     userId: state => state.userInfo.id,
-    nickname: state => state.userInfo.nickname,
+    nick_name: state => state.userInfo.nick_name,
     intro: state => state.userInfo.intro,
     website: state => state.userInfo.website,
     avatar: state => convertImgUrl(state.userInfo.avatar),

@@ -6,7 +6,7 @@ import AppPage from '@/components/common/AppPage.vue'
 import { useUserStore } from '@/store'
 import api from '@/api'
 
-const { nickname, avatar } = useUserStore()
+const { nick_name, avatar } = useUserStore()
 
 const homeInfo = ref({
   view_count: 0,
@@ -38,25 +38,25 @@ async function getOneSentence() {
         <div class="flex items-center">
           <NAvatar round :size="60" :src="avatar" />
           <div class="ml-5">
-            <p> Hello, {{ nickname }} </p>
+            <p> Hello, {{ nick_name }} </p>
             <NGradientText class="mt-1 op-60" gradient="linear-gradient(90deg, red 0%, green 50%, blue 100%)">
               {{ sentence }}
             </NGradientText>
           </div>
           <div class="ml-auto flex items-center">
             <NStatistic label="Stars" class="w-[80px]">
-              <a href="https://github.com/szluyu99/gin-vue-blog" target="_blank">
+              <a href="https://github.com/LXJ0000/webook/tree/v2" target="_blank">
                 <img
                   alt="stars"
-                  src="https://badgen.net/github/stars/szluyu99/gin-vue-blog"
+                  src="https://badgen.net/github/stars/LXJ0000/webook"
                 >
               </a>
             </NStatistic>
             <NStatistic label="Forks" class="ml-10 w-[100px]">
-              <a href="https://github.com/szluyu99/gin-vue-blog" target="_blank">
+              <a href="https://github.com/LXJ0000/webook/tree/v2" target="_blank">
                 <img
                   alt="forks"
-                  src="https://badgen.net/github/forks/szluyu99/gin-vue-blog"
+                  src="https://badgen.net/github/forks/LXJ0000/webook"
                 >
               </a>
             </NStatistic>

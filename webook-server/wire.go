@@ -18,13 +18,14 @@ func InitWebServer() *gin.Engine {
 		ioc.InitDB, ioc.InitRedis,
 		ioc.InitSMSService,
 		//dao
-		dao.NewUserDao, dao.NewMenuDao,
+		dao.NewUserDao, dao.NewMenuDao, dao.NewCommonDao,
 		//cache
-		cache.NewUserCache, cache.NewCodeCache,
+		cache.NewUserCache, cache.NewCodeCache, cache.NewCommonCache,
 		//repository
-		repository.NewUserRepository, repository.NewCodeRepository, repository.NewMenuRepository,
+		repository.NewUserRepository, repository.NewCodeRepository,
+		repository.NewMenuRepository, repository.NewCommonRepository,
 		//service
-		handler.NewUserHandler, handler.NewMenuHandler,
+		handler.NewUserHandler, handler.NewMenuHandler, handler.NewBlogInfoHandler,
 
 		ioc.InitGinMiddlewares,
 		ioc.InitWebServer,

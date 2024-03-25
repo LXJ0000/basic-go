@@ -6,7 +6,13 @@ import (
 	"webook-server/internal/middleware"
 )
 
-func InitWebServer(middlewares []gin.HandlerFunc, user handler.UserHandler, menu handler.MenuHandler) *gin.Engine {
+func InitWebServer(
+	middlewares []gin.HandlerFunc,
+	user handler.UserHandler,
+	menu handler.MenuHandler,
+	blog handler.BlogInfoHandler,
+
+) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -16,6 +22,7 @@ func InitWebServer(middlewares []gin.HandlerFunc, user handler.UserHandler, menu
 	r.Use(middlewares...)
 	user.InitRouter(r)
 	menu.InitRouter(r)
+	blog.InitRouter(r)
 	return r
 }
 
