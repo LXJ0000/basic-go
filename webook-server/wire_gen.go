@@ -26,9 +26,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitWebServer(window time.Duration, rate int) *gin.Engine {
+func InitWebServer(window2 time.Duration, rate2 int) *gin.Engine {
 	cmdable := ioc.InitRedis()
-	rateLimit := ratelimit.NewCacheSliceWindowLimiter(cmdable, window, rate)
+	rateLimit := ratelimit.NewCacheSliceWindowLimiter(cmdable, window2, rate2)
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(rateLimit)
 	v := ioc.InitGinMiddlewares(rateLimitMiddleware)
 	db := ioc.InitDB()
