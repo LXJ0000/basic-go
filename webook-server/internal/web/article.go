@@ -18,8 +18,8 @@ func NewArticleHandler(svc service.ArticleService) ArticleHandler {
 
 func (h *ArticleHandler) InitRouter(r *gin.Engine) {
 	base := r.Group("/api/article")
-	base.POST("/", h.CreateOrUpdate)
-	base.DELETE("/", h.Delete)
+	base.POST("", h.CreateOrUpdate)
+	base.DELETE("", h.Delete)
 }
 
 func (h *ArticleHandler) CreateOrUpdate(c *gin.Context) {
@@ -37,18 +37,24 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	articleId, err := h.svc.CreateOrUpdate(c, domain.Article{
-		Title:   req.Title,
-		Content: req.Content,
-		//Author:  domain.Author{},
+	authorId, ok := c.Get("user_id")
+	if !ok {
+		slog.Error("author fail", "")
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	err := h.svc.CreateOrUpdate(c, domain.Article{
+		Title:    req.Title,
+		Content:  req.Content,
+		AuthorId: authorId.(int64),
 	})
 	if err != nil {
-		slog.Error("", err.Error())
+		slog.Error("CreateOrUpdate fail", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, Response{
 		Code: 0,
-		Data: articleId,
+		Data: 1,
 	})
 }

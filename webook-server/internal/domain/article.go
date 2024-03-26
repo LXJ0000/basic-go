@@ -1,9 +1,9 @@
 package domain
 
 type Article struct {
-	Title   string
-	Content string
-	Author
+	Title    string
+	Content  string
+	AuthorId int64
 }
 
 type Author struct {

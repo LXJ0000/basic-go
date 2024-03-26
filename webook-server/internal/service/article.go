@@ -3,19 +3,21 @@ package service
 import (
 	"context"
 	"webook-server/internal/domain"
+	"webook-server/internal/repository"
 )
 
 type ArticleService interface {
-	CreateOrUpdate(ctx context.Context, article domain.Article) (int64, error)
+	CreateOrUpdate(ctx context.Context, article domain.Article) error
 }
 
 type ArticleSvc struct {
+	repo repository.ArticleRepo
 }
 
-func NewArticleService() ArticleService {
-	return &ArticleSvc{}
+func NewArticleService(repo repository.ArticleRepo) ArticleService {
+	return &ArticleSvc{repo: repo}
 }
 
-func (svc *ArticleSvc) CreateOrUpdate(ctx context.Context, article domain.Article) (int64, error) {
-	return 1, nil
+func (svc *ArticleSvc) CreateOrUpdate(ctx context.Context, article domain.Article) error {
+	return svc.repo.Create(ctx, article)
 }
