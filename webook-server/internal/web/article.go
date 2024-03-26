@@ -55,6 +55,5 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, Response{
 		Code: 0,
-		Data: 1,
 	})
 }

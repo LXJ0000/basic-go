@@ -3,10 +3,8 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"net/http"
@@ -83,7 +81,6 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 			gotCode: http.StatusOK,
 			gotResp: Response[int64]{
 				Code: 0,
-				Data: 1,
 			},
 		},
 	}
@@ -91,25 +88,53 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 		t.Run(tc.name, func(t *testing.T) {
 			//	1. 构造请求
 			tc.before(t)
+			//defer tc.after(t)
+
+			//reqBody, err := json.Marshal(tc.req)
+			//require.NoError(t, err)
+			//req, err := http.NewRequest(
+			//	http.MethodPost,
+			//	"/api/article",
+			//	bytes.NewReader(reqBody),
+			//)
+			//require.NoError(t, err)
+			//req.Header.Set("Content-Type", "application/json")
+			//resp := httptest.NewRecorder()
+			////	2. 执行
+			//s.r.ServeHTTP(resp, req)
+			////	3. 验证结果
+			//fmt.Printf("Body %+v\n", resp.Body)
+			//fmt.Printf("Code %+v\n", resp.Code)
+			//require.Equal(t, tc.gotCode, resp.Code)
+			//if resp.Code != http.StatusOK {
+			//	return
+			//}
+			//var respBody Response[int64]
+			//err = json.NewDecoder(resp.Body).Decode(&respBody)
+			//assert.NoError(t, err)
+			//assert.Equal(t, tc.gotResp, respBody)
+
 			reqBody, err := json.Marshal(tc.req)
-			require.NoError(t, err)
-			req, err := http.NewRequest(http.MethodPost, "/api/article", bytes.NewBuffer([]byte(reqBody)))
-			require.NoError(t, err)
+			assert.NoError(t, err)
+			// 准备Req和记录的 recorder
+			req, err := http.NewRequest(http.MethodPost,
+				"/api/articles",
+				bytes.NewReader(reqBody))
 			req.Header.Set("Content-Type", "application/json")
-			resp := httptest.NewRecorder()
-			//	2. 执行
-			s.r.ServeHTTP(resp, req)
-			//	3. 验证结果
-			fmt.Printf("Body %+v\n", resp.Body)
-			fmt.Printf("Code %+v\n", resp.Code)
-			require.Equal(t, tc.gotCode, resp.Code)
-			if resp.Code != http.StatusOK {
+			assert.NoError(t, err)
+			recorder := httptest.NewRecorder()
+
+			// 执行
+			s.r.ServeHTTP(recorder, req)
+			// 断言结果
+			assert.Equal(t, tc.gotCode, recorder.Code)
+			if tc.gotCode != http.StatusOK {
 				return
 			}
-			var respBody Response[int64]
-			err = json.Unmarshal(resp.Body.Bytes(), &respBody)
+			var res Response[int64]
+			err = json.NewDecoder(recorder.Body).Decode(&res)
 			assert.NoError(t, err)
-			assert.Equal(t, tc.gotResp, respBody)
+			assert.Equal(t, tc.gotResp, res)
 		})
 	}
 }
