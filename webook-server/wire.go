@@ -3,8 +3,6 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"time"
 	"webook-server/internal/repository"
 	"webook-server/internal/repository/cache"
@@ -15,6 +13,9 @@ import (
 	"webook-server/ioc"
 	"webook-server/pkg/jwt"
 	"webook-server/pkg/ratelimit"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 )
 
 func InitWebServer(window time.Duration, rate int) *gin.Engine {
@@ -22,20 +23,19 @@ func InitWebServer(window time.Duration, rate int) *gin.Engine {
 		//第三方依赖
 		ioc.InitDB, ioc.InitRedis,
 		//dao
-		dao.NewUserDao,
+		dao.NewUserDao, dao.NewArticleDao,
 		//cache
-		cache.NewCodeCache, cache.NewUserCache,
+		cache.NewCodeCache, cache.NewUserCache, cache.NewArticleCache,
 		//repository
-		repository.NewUserRepository, repository.NewCodeRepository,
+		repository.NewUserRepository, repository.NewCodeRepository, repository.NewArticleRepository,
 		//service
 		ioc.InitSMSService,
-		service.NewCodeService, service.NewUserService,
+		service.NewCodeService, service.NewUserService, service.NewArticleService,
 		//handler
 		web.NewUserHandler,
+		web.NewArticleHandler,
 
 		jwt.NewCacheJWTHandler,
-		//wire.Value(window),
-		//wire.Value(rate),
 		ratelimit.NewCacheSliceWindowLimiter,
 		middleware.NewAuthMiddleware,
 		middleware.NewRateLimitMiddleware,

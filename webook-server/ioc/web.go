@@ -1,12 +1,19 @@
 package ioc
 
 import (
-	"github.com/gin-gonic/gin"
 	"webook-server/internal/web"
 	"webook-server/internal/web/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
-func InitWebServer(middlewares []gin.HandlerFunc, user *web.UserHandler, auth *middleware.AuthMiddleware) *gin.Engine {
+func InitWebServer(
+	middlewares []gin.HandlerFunc,
+	auth *middleware.AuthMiddleware,
+
+	user web.UserHandler,
+	article web.ArticleHandler,
+) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -14,6 +21,7 @@ func InitWebServer(middlewares []gin.HandlerFunc, user *web.UserHandler, auth *m
 	})
 	r.Use(middlewares...)
 	user.InitRouter(r, auth)
+	article.InitRouter(r, auth)
 	return r
 }
 

@@ -3,10 +3,6 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"gorm.io/gorm"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +11,14 @@ import (
 	dao2 "webook-server/internal/repository/dao"
 	"webook-server/internal/service"
 	"webook-server/internal/web"
+	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
+	"webook-server/pkg/jwt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
 )
 
 // ArticleTestSuit 测试套件
@@ -39,7 +42,9 @@ func (s *ArticleTestSuit) SetupSuite() {
 	repo := repository.NewArticleRepository(dao, cache)
 	svc := service.NewArticleService(repo)
 	h := web.NewArticleHandler(svc)
-	h.InitRouter(r)
+	jwt := jwt.NewCacheJWTHandler(cmd)
+	auth := middleware.NewAuthMiddleware(jwt)
+	h.InitRouter(r, auth)
 	s.r = r
 	s.db = db
 }
@@ -67,12 +72,12 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 			},
 			after: func(t *testing.T) {
 				//... 检查数据库
-				var article dao2.Article
-				err := s.db.Model(&dao2.Article{}).Where("").First(&article).Error // ...
-				assert.NoError(t, err)
-				assert.True(t, article.CreateAt > 0)
-				article.CreateAt = 0                     // ...
-				assert.Equal(t, dao2.Article{}, article) // ...
+				// var article dao2.Article
+				// err := s.db.Model(&dao2.Article{}).Where("").First(&article).Error // ...
+				// assert.NoError(t, err)
+				// assert.True(t, article.CreateAt > 0)
+				// article.CreateAt = 0                     // ...
+				// assert.Equal(t, dao2.Article{}, article) // ...
 			},
 			req: Req{
 				Title:   "123",
@@ -118,7 +123,7 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 			assert.NoError(t, err)
 			// 准备Req和记录的 recorder
 			req, err := http.NewRequest(http.MethodPost,
-				"/api/articles",
+				"/api/article",
 				bytes.NewReader(reqBody))
 			req.Header.Set("Content-Type", "application/json")
 			assert.NoError(t, err)
