@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"webook-server/internal/domain"
@@ -19,7 +20,7 @@ func NewArticleHandler(svc service.ArticleService) ArticleHandler {
 }
 
 func (h *ArticleHandler) InitRouter(r *gin.Engine, auth *middleware.AuthMiddleware) {
-	base := r.Group("/api/article").Use(auth.JwtAuthMiddleware())
+	base := r.Group("/api/article")
 	base.POST("", h.CreateOrUpdate)
 	base.DELETE("", h.Delete)
 }
@@ -37,9 +38,13 @@ func (h *ArticleHandler) CreateOrUpdate(c *gin.Context) {
 	}
 	userIdRaw, exist := c.Get("user_id")
 	authorId, ok := userIdRaw.(int64)
+	slog.Info("authorization", "userIdRaw type", fmt.Sprintf("%T", userIdRaw))
+	slog.Info("authorization", "userid", userIdRaw, "authorId", authorId)
+	slog.Info("authorization", "exist", exist, "ok", ok)
+
 	if !exist || !ok {
 		slog.Error("用户登录状态有误")
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 	err := h.svc.CreateOrUpdate(c, domain.Article{

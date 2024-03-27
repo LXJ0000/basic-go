@@ -11,8 +11,8 @@ func InitWebServer(
 	middlewares []gin.HandlerFunc,
 	auth *middleware.AuthMiddleware,
 
-	user web.UserHandler,
-	article web.ArticleHandler,
+	user *web.UserHandler,
+	article *web.ArticleHandler,
 ) *gin.Engine {
 	r := gin.Default()
 

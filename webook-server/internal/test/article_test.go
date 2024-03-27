@@ -1,5 +1,7 @@
 package test
 
+//
+
 import (
 	"bytes"
 	"encoding/json"
@@ -11,9 +13,7 @@ import (
 	dao2 "webook-server/internal/repository/dao"
 	"webook-server/internal/service"
 	"webook-server/internal/web"
-	"webook-server/internal/web/middleware"
 	"webook-server/ioc"
-	"webook-server/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -29,11 +29,7 @@ type ArticleTestSuit struct {
 }
 
 func (s *ArticleTestSuit) SetupSuite() {
-	r := gin.Default()
-	r.Use(func(context *gin.Context) {
-		context.Set("user_id", 1)
-		context.Next()
-	})
+
 	//注册路由
 	cmd := ioc.InitRedis()
 	db := ioc.InitDB()
@@ -42,9 +38,12 @@ func (s *ArticleTestSuit) SetupSuite() {
 	repo := repository.NewArticleRepository(dao, cache)
 	svc := service.NewArticleService(repo)
 	h := web.NewArticleHandler(svc)
-	jwt := jwt.NewCacheJWTHandler(cmd)
-	auth := middleware.NewAuthMiddleware(jwt)
-	h.InitRouter(r, auth)
+
+	r := gin.Default()
+	r.Use(func(ctx *gin.Context) {
+		ctx.Set("user_id", int64(1))
+	})
+	h.InitRouter(r, nil)
 	s.r = r
 	s.db = db
 }
@@ -91,33 +90,8 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			//	1. 构造请求
 			tc.before(t)
-			//defer tc.after(t)
-
-			//reqBody, err := json.Marshal(tc.req)
-			//require.NoError(t, err)
-			//req, err := http.NewRequest(
-			//	http.MethodPost,
-			//	"/api/article",
-			//	bytes.NewReader(reqBody),
-			//)
-			//require.NoError(t, err)
-			//req.Header.Set("Content-Type", "application/json")
-			//resp := httptest.NewRecorder()
-			////	2. 执行
-			//s.r.ServeHTTP(resp, req)
-			////	3. 验证结果
-			//fmt.Printf("Body %+v\n", resp.Body)
-			//fmt.Printf("Code %+v\n", resp.Code)
-			//require.Equal(t, tc.gotCode, resp.Code)
-			//if resp.Code != http.StatusOK {
-			//	return
-			//}
-			//var respBody Response[int64]
-			//err = json.NewDecoder(resp.Body).Decode(&respBody)
-			//assert.NoError(t, err)
-			//assert.Equal(t, tc.gotResp, respBody)
+			defer tc.after(t)
 
 			reqBody, err := json.Marshal(tc.req)
 			assert.NoError(t, err)

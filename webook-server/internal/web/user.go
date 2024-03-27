@@ -47,8 +47,8 @@ type UserHandler struct {
 	jwtHandler jwt.JWTHandler
 }
 
-func NewUserHandler(svc service.UserService, codeSvc service.CodeService, jwtHandler jwt.JWTHandler) UserHandler {
-	return UserHandler{
+func NewUserHandler(svc service.UserService, codeSvc service.CodeService, jwtHandler jwt.JWTHandler) *UserHandler {
+	return &UserHandler{
 		svc:            svc,
 		codeSvc:        codeSvc,
 		emailRegexp:    regexp.MustCompile(RegexpEmail, regexp.None),
