@@ -1,7 +1,5 @@
 package test
 
-//
-
 import (
 	"bytes"
 	"encoding/json"
@@ -52,6 +50,7 @@ func (s *ArticleTestSuit) TearDownTest() {
 	s.db.Exec("TRUNCATE TABLE articles") // 清空数据 自增主键恢复0
 }
 
+// TestCreateOrUpdate 集成测试 TDD
 func (s *ArticleTestSuit) TestCreateOrUpdate() {
 	t := s.T()
 	tcs := []struct {
@@ -88,6 +87,7 @@ func (s *ArticleTestSuit) TestCreateOrUpdate() {
 			},
 		},
 	}
+	// 更新 todo 创建 更新非自己
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(t)

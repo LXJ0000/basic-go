@@ -15,8 +15,8 @@ type ArticleHandler struct {
 	svc service.ArticleService
 }
 
-func NewArticleHandler(svc service.ArticleService) ArticleHandler {
-	return ArticleHandler{svc: svc}
+func NewArticleHandler(svc service.ArticleService) *ArticleHandler {
+	return &ArticleHandler{svc: svc}
 }
 
 func (h *ArticleHandler) InitRouter(r *gin.Engine, auth *middleware.AuthMiddleware) {
@@ -27,6 +27,7 @@ func (h *ArticleHandler) InitRouter(r *gin.Engine, auth *middleware.AuthMiddlewa
 
 func (h *ArticleHandler) CreateOrUpdate(c *gin.Context) {
 	type Req struct {
+		Type    int    `json:"type"` // 0 create 1 update
 		Title   string `json:"title"`
 		Content string `json:"content"`
 	}
@@ -63,5 +64,9 @@ func (h *ArticleHandler) CreateOrUpdate(c *gin.Context) {
 }
 
 func (h *ArticleHandler) Delete(c *gin.Context) {
+
+}
+
+func (h *ArticleHandler) Publish(c *gin.Context) {
 
 }
